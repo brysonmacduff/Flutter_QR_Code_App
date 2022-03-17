@@ -1,92 +1,59 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'generate_qr.dart';
+import 'scan_qr.dart';
 
-void main() => runApp(MyApp());
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: QRInput(),
-    );
-  }
+void main() {
+  runApp(const HomePageRoute());
 }
 
-/*
-// This widget is the root of your application.
-class QRApp extends StatelessWidget {
-  const QRApp({Key? key}) : super(key: key);
+// serves as a wrapper class for rendering the actual home page
+class HomePageRoute extends StatelessWidget {
+  const HomePageRoute({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: const QRPage(),
-    );
+    return const MaterialApp(home: HomePage());
   }
 }
 
-class QRPage extends StatelessWidget {
-  const QRPage({Key? key}) : super(key: key);
+class HomePage extends StatelessWidget {
+  const HomePage({Key? key}) : super(key: key);
+
+  void goToGenerateQR() {}
+
+  void goToScanQR() {}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("QR Code"),
-        backgroundColor: const Color.fromARGB(255, 46, 73, 107),
-      ),
-      body: Center(
-        child: QrImage(
-          data: "hello there",
-          version: QrVersions.auto,
-          size: 200.0,
-        ),
-      ),
-    );
-  }
-}
-*/
-class QRInput extends StatefulWidget {
-  const QRInput({Key? key}) : super(key: key);
-
-  @override
-  State<QRInput> createState() => _QRInputState();
-}
-
-class _QRInputState extends State<QRInput> {
-  String qrData = "";
-  String tfValue = "No message"; // stores the input field's string
-
-  // gets the qr data input string on button press
-  void getInputText() {
-    setState(() {
-      qrData = tfValue;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("QR Code App"),
+        title: const Text("Home"),
         backgroundColor: const Color.fromARGB(255, 46, 73, 107),
       ),
       body: Center(
         child: Column(
           children: [
-            TextField(
-              decoration: const InputDecoration(labelText: 'QR Data Input'),
-              onChanged: (value) => tfValue = value,
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const GenerateQR(),
+                  ),
+                );
+              },
+              child: const Text("Generate QR Code"),
             ),
             TextButton(
-              onPressed: getInputText,
-              child: const Text("Submit"),
-            ),
-            QrImage(
-              data: qrData,
-              version: QrVersions.auto,
-              size: 200.0,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ScanQR(),
+                  ),
+                );
+              },
+              child: const Text("Scan QR Code"),
             ),
           ],
         ),
