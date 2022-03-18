@@ -1,8 +1,26 @@
 import 'package:flutter/material.dart';
-//import 'package:web3dart/web3dart.dart';
+import 'package:http/http.dart';
+import 'package:web3dart/web3dart.dart';
 
-class SmartContract extends StatelessWidget {
+class SmartContract extends StatefulWidget {
   const SmartContract({Key? key}) : super(key: key);
+
+  @override
+  _SmartContractPageState createState() => _SmartContractPageState();
+}
+
+class _SmartContractPageState extends State<SmartContract> {
+  late Client httpClient;
+  late Web3Client ethClient;
+  
+  @override
+  void initState() {
+    super.initState(); 
+    httpClient = Client();
+    ethClient = Web3Client("http://localhost:8545", httpClient);
+  }
+
+  // TODO: Create the Smart Contract & load it into this application
 
   @override
   Widget build(BuildContext context) {
