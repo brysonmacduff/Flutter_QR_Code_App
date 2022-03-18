@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'generate_qr.dart';
 import 'scan_qr.dart';
+import 'smart_contract.dart';
 
 void main() {
   runApp(const HomePageRoute());
@@ -54,6 +55,17 @@ class HomePage extends StatelessWidget {
                 );
               },
               child: const Text("Scan QR Code"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SmartContract(),
+                  ),
+                );
+              },
+              child: const Text("View Smart Contract"),
             ),
           ],
         ),
