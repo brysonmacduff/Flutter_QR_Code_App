@@ -34,6 +34,10 @@ class _ScanQRState extends State<ScanQR> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Scan QR Code"),
+        backgroundColor: const Color.fromARGB(255, 46, 73, 107),
+      ),
       body: Column(
         children: <Widget>[
           Expanded(flex: 4, child: _buildQrView(context)),
