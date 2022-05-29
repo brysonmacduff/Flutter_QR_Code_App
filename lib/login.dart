@@ -1,4 +1,8 @@
+// dependances
 import 'package:flutter/material.dart';
+import 'package:mysql1/mysql1.dart';
+
+// other project files
 import 'package:ceg4912_project/homepage.dart';
 import 'package:ceg4912_project/signup.dart';
 
@@ -20,11 +24,30 @@ class LogInPagePage extends StatefulWidget {
 }
 
 class _LogInPagePageState extends State<LogInPagePage> {
-  String id = "";
+  String email = "";
   String password = "";
 
-  // try to log in using the id and password, then redirect to home page
-  void signIn() {}
+  // try to log in using the email and password, then redirect to home page
+  // needs to be async to work
+  // TESTING for now - MySQL queries seem to work!
+  void signIn() async {
+    /* currently configured to connect to the test ClearDB database 
+    that is integrated with Heroku */
+    var settings = ConnectionSettings(
+        host: 'us-cdbr-east-05.cleardb.net',
+        port: 3306,
+        user: 'b4c34f510a627f',
+        password: '51fb516c',
+        db: 'heroku_3eb2baaa59ea134');
+
+    var conn = await MySqlConnection.connect(settings);
+
+    var results = await conn.query("select * from user");
+
+    for (var row in results) {
+      print(row);
+    }
+  }
 
   // redirect to the sign up page
   void signUp() {
@@ -47,7 +70,7 @@ class _LogInPagePageState extends State<LogInPagePage> {
           children: [
             TextField(
               decoration: const InputDecoration(labelText: 'Email'),
-              onChanged: (value) => id = value,
+              onChanged: (value) => email = value,
             ),
             TextField(
               decoration: const InputDecoration(labelText: 'Password'),
