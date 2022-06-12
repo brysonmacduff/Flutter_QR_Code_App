@@ -1,3 +1,4 @@
+import 'package:ceg4912_project/Support/queries.dart';
 import 'package:flutter/material.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -20,8 +21,32 @@ class _SignUpPageState extends State<SignUpPage> {
 
   List<Widget> widgets = <Widget>[];
 
-  void signUp() {
+  void signUp() async {
+    // passwords must match
+    if (password1 != password2) {
+      print("passwords do not match");
+      return;
+    }
+
+    bool result = false;
+
     // create new user in database
+    if (role == roles.customer) {
+      var conn = await Queries.getConnection();
+      result = await Queries.insertCustomer(conn, email, password1);
+
+      print("customer creation successful? = " + result.toString());
+    } else if (role == roles.merchant) {
+      // WIP
+      print("create a merchant account");
+    }
+
+    // go back to the login page
+    if (result == true) {
+      // go to login page
+      print("returning to login page");
+      Navigator.pop(context);
+    }
   }
 
   // adds the fields that are unique to the merchant

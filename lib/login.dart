@@ -2,9 +2,13 @@
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
 
-// other project files
+// other project pages
 import 'package:ceg4912_project/homepage.dart';
 import 'package:ceg4912_project/signup.dart';
+
+// support files
+import 'package:ceg4912_project/Support/queries.dart';
+import 'package:ceg4912_project/Models/user.dart';
 
 class LogInPageRoute extends StatelessWidget {
   const LogInPageRoute({Key? key}) : super(key: key);
@@ -33,19 +37,22 @@ class _LogInPagePageState extends State<LogInPagePage> {
   void signIn() async {
     /* currently configured to connect to the test ClearDB database 
     that is integrated with Heroku */
-    var settings = ConnectionSettings(
-        host: 'us-cdbr-east-05.cleardb.net',
-        port: 3306,
-        user: 'b4c34f510a627f',
-        password: '51fb516c',
-        db: 'heroku_3eb2baaa59ea134');
 
-    var conn = await MySqlConnection.connect(settings);
+    var conn = await Queries.getConnection();
+    var user = await Queries.getUser(conn, email, password);
 
-    var results = await conn.query("select * from user");
+    if (user == null) {
+      // login failed
+      print("login failed");
+      return;
+    }
 
-    for (var row in results) {
-      print(row);
+    if (user.getRole() == "C") {
+      print("login as customer");
+      // go to customer home page
+    } else if (user.getRole() == "M") {
+      print("login as merchant");
+      // go to merchant home page
     }
   }
 
