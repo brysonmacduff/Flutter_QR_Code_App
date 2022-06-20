@@ -1,4 +1,6 @@
-// dependances
+// dependencies
+//import 'dart:html';
+
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
 
@@ -8,6 +10,9 @@ import 'package:ceg4912_project/signup.dart';
 
 // support files
 import 'package:ceg4912_project/Support/queries.dart';
+import 'package:ceg4912_project/Support/session.dart';
+
+// model files
 import 'package:ceg4912_project/Models/user.dart';
 
 class LogInPageRoute extends StatelessWidget {
@@ -15,19 +20,19 @@ class LogInPageRoute extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: LogInPagePage());
+    return const MaterialApp(home: LogInPage());
   }
 }
 
 // serves as a wrapper class for rendering the actual splash page
-class LogInPagePage extends StatefulWidget {
-  const LogInPagePage({Key? key}) : super(key: key);
+class LogInPage extends StatefulWidget {
+  const LogInPage({Key? key}) : super(key: key);
 
   @override
-  State<LogInPagePage> createState() => _LogInPagePageState();
+  State<LogInPage> createState() => _LogInPageState();
 }
 
-class _LogInPagePageState extends State<LogInPagePage> {
+class _LogInPageState extends State<LogInPage> {
   String email = "";
   String password = "";
 
@@ -47,10 +52,13 @@ class _LogInPagePageState extends State<LogInPagePage> {
       return;
     }
 
-    if (user.getRole() == "C") {
+    // set this user as the current session user
+    Session.setSessionUser(user);
+
+    if (user.getRole() == Roles.customer) {
       print("login as customer");
       // go to customer home page
-    } else if (user.getRole() == "M") {
+    } else if (user.getRole() == Roles.merchant) {
       print("login as merchant");
       // go to merchant home page
     }

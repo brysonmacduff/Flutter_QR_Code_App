@@ -1,5 +1,7 @@
 import 'package:ceg4912_project/Support/queries.dart';
+import 'package:ceg4912_project/Support/session.dart';
 import 'package:flutter/material.dart';
+import 'package:ceg4912_project/Models/user.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -8,54 +10,86 @@ class SignUpPage extends StatefulWidget {
   State<SignUpPage> createState() => _SignUpPageState();
 }
 
-enum roles { merchant, customer }
-
 class _SignUpPageState extends State<SignUpPage> {
   // basic information
   String email = "";
   String password1 = "";
   String password2 = "";
 
+  String signUpEventMessage = "";
+  Color signUpEventColor = const Color.fromARGB(0, 0, 0, 1);
+
   // stores the role of the user that is signing up
-  roles? role = roles.customer;
+  Roles? role = Roles.customer;
 
   List<Widget> widgets = <Widget>[];
 
   void signUp() async {
     // passwords must match
-    if (password1 != password2) {
-      print("passwords do not match");
+    if (!isPasswordValid(password1, password2) || !isEmailValid(email)) {
+      // display error message
+      setState(() {
+        signUpEventMessage = "Email Or Password Is Invalid";
+        signUpEventColor = const Color.fromARGB(255, 255, 0, 0);
+      });
+
       return;
     }
 
     bool result = false;
 
     // create new user in database
-    if (role == roles.customer) {
+    if (role == Roles.customer) {
       var conn = await Queries.getConnection();
       result = await Queries.insertCustomer(conn, email, password1);
 
       print("customer creation successful? = " + result.toString());
-    } else if (role == roles.merchant) {
+    } else if (role == Roles.merchant) {
       // WIP
       print("create a merchant account");
     }
 
-    // go back to the login page
-    if (result == true) {
-      // go to login page
-      print("returning to login page");
-      Navigator.pop(context);
+    setState(() {
+      if (result == true) {
+        // display sign up success message
+        signUpEventMessage = "Sign Up Successful";
+        signUpEventColor = const Color.fromARGB(255, 21, 255, 0);
+      } else {
+        // display error message
+        signUpEventMessage = "Sign Up Failed";
+        signUpEventColor = const Color.fromARGB(255, 255, 0, 0);
+      }
+    });
+  }
+
+  // checks if the provided email is of a valid form
+  bool isEmailValid(String email) {
+    if (email.isEmpty) {
+      return false;
     }
+    return true;
+  }
+
+  // checks if the password is valid
+  bool isPasswordValid(String p1, String p2) {
+    if (p1.isEmpty || p2.isEmpty) {
+      return false;
+    } else if (p1 != p2) {
+      return false;
+    }
+    return true;
   }
 
   // adds the fields that are unique to the merchant
   void addMerchantFields() {
     setState(() {
-      for (int i = 0; i < 40; i++) {
-        widgets.add(TextField(
+      for (int i = 0; i < 10; i++) {
+        widgets.add(
+          TextField(
             decoration:
-                InputDecoration(labelText: 'Merchant Field ' + i.toString())));
+                InputDecoration(labelText: 'Merchant Field ' + i.toString()),
+          ),
+        );
       }
     });
     print("adding merchant fields");
@@ -84,9 +118,9 @@ class _SignUpPageState extends State<SignUpPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Radio(
-                value: roles.customer,
+                value: Roles.customer,
                 groupValue: role,
-                onChanged: (roles? value) {
+                onChanged: (Roles? value) {
                   setState(() {
                     role = value;
                     removeMerchantFields();
@@ -95,9 +129,9 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               const Text("Customer"),
               Radio(
-                value: roles.merchant,
+                value: Roles.merchant,
                 groupValue: role,
-                onChanged: (roles? value) {
+                onChanged: (Roles? value) {
                   setState(() {
                     role = value;
                     // add more widgets for merchant financial info
@@ -126,6 +160,19 @@ class _SignUpPageState extends State<SignUpPage> {
           TextButton(
             onPressed: signUp,
             child: const Text("Sign Up"),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              signUpEventMessage,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: signUpEventColor,
+                fontSize: 20,
+              ),
+            ),
           ),
         ],
       ),

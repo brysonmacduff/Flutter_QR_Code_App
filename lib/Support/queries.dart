@@ -1,5 +1,4 @@
 import 'package:mysql1/mysql1.dart';
-import 'package:ceg4912_project/Models/customer.dart';
 import 'package:ceg4912_project/Models/user.dart';
 
 // a public class of sql queries
@@ -33,7 +32,12 @@ class Queries {
       String uPassword = results.first["uPassword"];
       String uRole = results.first["uRole"];
 
-      User user = User(uId, uEmail, uPassword, uRole);
+      Roles role = Roles.merchant;
+      if (uRole == "C") {
+        role = Roles.customer;
+      }
+
+      User user = User.user(uId, uEmail, uPassword, role);
       return user;
     } catch (e) {
       return null;
