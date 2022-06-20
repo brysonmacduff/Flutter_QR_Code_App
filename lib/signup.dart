@@ -28,11 +28,8 @@ class _SignUpPageState extends State<SignUpPage> {
     // passwords must match
     if (!isPasswordValid(password1, password2) || !isEmailValid(email)) {
       // display error message
-      setState(() {
-        signUpEventMessage = "Email Or Password Is Invalid";
-        signUpEventColor = const Color.fromARGB(255, 255, 0, 0);
-      });
-
+      setEventMessage(
+          "Email Or Password Is Invalid", const Color.fromARGB(255, 255, 0, 0));
       return;
     }
 
@@ -49,16 +46,21 @@ class _SignUpPageState extends State<SignUpPage> {
       print("create a merchant account");
     }
 
+    if (result == true) {
+      // display sign up success message
+      setEventMessage(
+          "Sign Up Successful", const Color.fromARGB(255, 21, 255, 0));
+    } else {
+      // display error message
+      setEventMessage("Sign Up Failed", const Color.fromARGB(255, 255, 0, 0));
+    }
+  }
+
+  // sends a message to the setup page UI to inform the user of something
+  void setEventMessage(String message, Color color) {
     setState(() {
-      if (result == true) {
-        // display sign up success message
-        signUpEventMessage = "Sign Up Successful";
-        signUpEventColor = const Color.fromARGB(255, 21, 255, 0);
-      } else {
-        // display error message
-        signUpEventMessage = "Sign Up Failed";
-        signUpEventColor = const Color.fromARGB(255, 255, 0, 0);
-      }
+      signUpEventMessage = message;
+      signUpEventColor = color;
     });
   }
 
