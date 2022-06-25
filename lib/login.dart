@@ -7,6 +7,7 @@ import 'package:mysql1/mysql1.dart';
 // other project pages
 import 'package:ceg4912_project/homepage.dart';
 import 'package:ceg4912_project/signup.dart';
+import 'package:ceg4912_project/Merchant/merchant_homepage.dart';
 
 // support files
 import 'package:ceg4912_project/Support/queries.dart';
@@ -109,6 +110,17 @@ class _LogInPageState extends State<LogInPage> {
                 );
               },
               child: const Text("Home Page (Dev Mode)"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const MerchantHomePage(),
+                  ),
+                );
+              },
+              child: const Text("Merchant Home Page (Dev Mode)"),
             ),
           ],
         ),
