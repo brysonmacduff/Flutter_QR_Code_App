@@ -103,4 +103,96 @@ class Queries {
       return false;
     }
   }
+
+  // inserts a new merchant into the database
+  static insertMerchant(
+      MySqlConnection conn,
+      String email,
+      String password,
+      String firstName,
+      String lastName,
+      String ssn,
+      String businessWebsite,
+      String businessName,
+      String businessType,
+      String businessPhone,
+      String psCompletionDelay,
+      String billingFrequency,
+      String industry,
+      String financialInstitution,
+      String csEmail,
+      String csPhone,
+      String streetAddress,
+      String postalCode,
+      String psDescription,
+      DateTime merchantBirthDate) async {
+    try {
+      // check if this user already has an account
+      var exists = await userExists(conn, email);
+      if (exists) {
+        print("account already exists");
+        return false;
+      }
+
+      var result = await _getMaxUserId(conn);
+      int maxId = result.first["maxId"];
+      String nextId = (maxId + 1).toString();
+
+      // insert user
+      String uQuery = "insert into user values (" +
+          nextId +
+          ",'" +
+          email +
+          "','" +
+          password +
+          "','M')";
+
+      await conn.query(uQuery);
+
+      // insert merchant
+      String mQuery = "insert into merchant values(" +
+          nextId +
+          ",'" +
+          firstName +
+          "','" +
+          lastName +
+          "','" +
+          merchantBirthDate.toString() +
+          "','" +
+          ssn +
+          "','" +
+          businessPhone +
+          "','" +
+          streetAddress +
+          "','" +
+          postalCode +
+          "','" +
+          industry +
+          "','" +
+          businessType +
+          "','" +
+          psDescription +
+          "','" +
+          psCompletionDelay +
+          "','" +
+          billingFrequency +
+          "','" +
+          businessName +
+          "','" +
+          businessWebsite +
+          "','" +
+          csPhone +
+          "','" +
+          csEmail +
+          "','" +
+          financialInstitution +
+          "');";
+
+      await conn.query(mQuery);
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
 }
