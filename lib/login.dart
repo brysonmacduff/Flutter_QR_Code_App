@@ -2,7 +2,7 @@
 //import 'dart:html';
 
 import 'package:flutter/material.dart';
-import 'package:mysql1/mysql1.dart';
+//import 'package:mysql1/mysql1.dart';
 
 // other project pages
 import 'package:ceg4912_project/homepage.dart';
@@ -14,6 +14,8 @@ import 'package:ceg4912_project/Support/session.dart';
 
 // model files
 import 'package:ceg4912_project/Models/user.dart';
+
+import 'Models/item_page.dart';
 
 class LogInPageRoute extends StatelessWidget {
   const LogInPageRoute({Key? key}) : super(key: key);
@@ -74,6 +76,16 @@ class _LogInPageState extends State<LogInPage> {
     );
   }
 
+  // redirect to the item page
+  void itemPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ItemPage(),
+      ),
+    );
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -98,6 +110,10 @@ class _LogInPageState extends State<LogInPage> {
             TextButton(
               onPressed: signUp,
               child: const Text("Sign Up"),
+            ),
+            TextButton(
+              onPressed: itemPage,
+              child: const Text("Item Page (Dev Mode)"),
             ),
             TextButton(
               onPressed: () {

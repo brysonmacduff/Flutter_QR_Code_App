@@ -1,3 +1,7 @@
+import 'package:ceg4912_project/Models/customer.dart';
+import 'package:ceg4912_project/Models/item.dart';
+import 'package:ceg4912_project/Models/merchant.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:ceg4912_project/Models/user.dart';
 
@@ -32,13 +36,11 @@ class Queries {
       String uPassword = results.first["uPassword"];
       String uRole = results.first["uRole"];
 
-      Roles role = Roles.merchant;
       if (uRole == "C") {
-        role = Roles.customer;
+        return Customer.credentials(uId, uEmail, uPassword);
+      } else {
+        return Merchant.credentials(uId, uEmail, uPassword);
       }
-
-      User user = User.user(uId, uEmail, uPassword, role);
-      return user;
     } catch (e) {
       return null;
     }
@@ -193,6 +195,52 @@ class Queries {
     } catch (e) {
       print(e);
       return false;
+    }
+  }
+
+  // gets the business items that pertain to a merchant identified by mId
+  static getMerchantItems(MySqlConnection conn, int mId) async {
+    String query = "select * from item where mId = '" + mId.toString() + "'";
+
+    // result rows are in JSON format
+    try {
+      List<Item> items = <Item>[];
+      var results = await conn.query(query);
+      var iterator = results.iterator;
+
+      while (iterator.moveNext()) {
+        var result = iterator.current;
+
+        int iId = result["iId"];
+        int mId = result["mId"];
+        String iName = result["iName"];
+        String iCode = result["iCode"];
+        String iDetails = result["iDetails"].toString();
+        String iCategory = result["iCategory"];
+        double iPrice = result["iPrice"];
+        int iTaxable = result["iTaxable"];
+
+        bool taxable = false;
+        // mysql stores booleans as integers but only lets them be 1 or 0.
+        if (iTaxable == 1) {
+          taxable = true;
+        }
+
+        Categories category = Categories.none;
+
+        // this looks redundant now but will be extended as more categories are included
+        if (iCategory == "none") {
+          category = Categories.none;
+        }
+
+        items.add(Item.all(
+            iId, mId, iName, iCode, iDetails, category, iPrice, taxable));
+      }
+
+      return items;
+    } catch (e) {
+      print(e);
+      return null;
     }
   }
 }
