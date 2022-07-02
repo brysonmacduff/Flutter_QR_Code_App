@@ -47,11 +47,23 @@ class Item {
     return _category;
   }
 
+  String getCategoryString() {
+    return "None";
+  }
+
   double getPrice() {
     return _price;
   }
 
   bool isTaxable() {
     return _taxable;
+  }
+
+  String isTaxableString() {
+    if (_taxable) {
+      return "Yes";
+    } else {
+      return "No";
+    }
   }
 }
