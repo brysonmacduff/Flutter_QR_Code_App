@@ -244,11 +244,13 @@ class Queries {
     }
   }
 
+  // gets the largest primary key id of the item table
   static _getMaxItemId(MySqlConnection conn) async {
     String query = "select max(iId) as maxId from item";
     return await conn.query(query);
   }
 
+  // inserts a new item into the database
   static insertItem(
       MySqlConnection conn,
       int merchantId,
@@ -262,6 +264,11 @@ class Queries {
       var result = await _getMaxItemId(conn);
       int maxId = result.first["maxId"];
       String nextId = (maxId + 1).toString();
+
+      int nTaxable = 1;
+      if (!taxable) {
+        nTaxable = 0;
+      }
 
       String query = "insert into item values ('" +
           nextId +
@@ -278,13 +285,26 @@ class Queries {
           "','" +
           price +
           "','" +
-          taxable.toString() +
+          nTaxable.toString() +
           "')";
 
       await conn.query(query);
       return true;
     } catch (e) {
       print("insertItem(): " + e.toString());
+      return false;
+    }
+  }
+
+  // deletes an item by specifying its primary key id
+  static deleteItem(MySqlConnection conn, int itemId) async {
+    try {
+      String query = "delete from item where iId = " + itemId.toString() + "";
+      await conn.query(query);
+
+      return true;
+    } catch (e) {
+      print("delteItem(): " + e.toString());
       return false;
     }
   }

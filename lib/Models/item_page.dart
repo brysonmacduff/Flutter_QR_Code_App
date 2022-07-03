@@ -1,6 +1,7 @@
 import 'package:ceg4912_project/Models/new_item_page.dart';
 import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/Support/session.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ceg4912_project/Models/item.dart';
 
@@ -20,6 +21,13 @@ class _ItemPageState extends State<ItemPage> {
   List<Widget> itemWidgets = <Widget>[];
   // keeps track of which item widgets are expanded in the UI
   List<bool> itemExpandedStateSet = <bool>[];
+  // keeps track of which items the user may be attempting to delete
+  List<bool> itemDeletionStateSet = <bool>[];
+
+  // the color of event messages that are displayed to the user
+  Color eventMessageColor = Colors.white;
+  // the message that is displayed to the user to inform them of events
+  String eventMessage = "";
 
   // generates widgets for all of the current merchant's business items
   void getItems() async {
@@ -36,13 +44,15 @@ class _ItemPageState extends State<ItemPage> {
     items.clear();
     itemWidgets.clear();
     itemExpandedStateSet.clear();
+    itemDeletionStateSet.clear();
 
     for (int i = 0; i < mItems.length; i++) {
       items.add(mItems[i]);
       itemExpandedStateSet.add(false);
+      itemDeletionStateSet.add(false);
 
       setState(() {
-        itemWidgets.add(getItemWidget(i, false));
+        itemWidgets.add(getItemWidget(i, false, false));
       });
     }
     print("items length = " + itemWidgets.length.toString());
@@ -58,20 +68,49 @@ class _ItemPageState extends State<ItemPage> {
     );
   }
 
-  // permanently deletes an item
-  void deleteItem(int itemIndex) {}
+  // permanently deletes an item from the database
+  void deleteItem(int itemIndex) async {
+    var conn = await Queries.getConnection();
+    int iId = items[itemIndex].getItemId();
+    var result = await Queries.deleteItem(conn, iId);
+
+    setState(() {
+      if (!result) {
+        eventMessage = "Item Deletion Failed";
+        eventMessageColor = Colors.red;
+        return;
+      }
+
+      // remove the widget from the UI that represented the deleted item
+      // refresh the items page after a deleteion
+      getItems();
+    });
+  }
+
+  // toggles the prompt that the user uses to confirm their intention to delete an item
+  void toggleItemDeletionPrompt(int itemIndex) {
+    bool deletionState = !itemDeletionStateSet[itemIndex]; // invert the state
+    bool expandedState = itemExpandedStateSet[itemIndex];
+    itemDeletionStateSet[itemIndex] = deletionState;
+    setState(() {
+      itemWidgets[itemIndex] =
+          getItemWidget(itemIndex, expandedState, deletionState);
+    });
+  }
 
   // expands the full details of an item to the UI
   void expandItem(int itemIndex) {
-    bool expandedState = !itemExpandedStateSet[itemIndex];
+    bool expandedState = !itemExpandedStateSet[itemIndex]; // invert the state
+    bool deletionState = itemDeletionStateSet[itemIndex];
     itemExpandedStateSet[itemIndex] = expandedState;
     setState(() {
-      itemWidgets[itemIndex] = getItemWidget(itemIndex, expandedState);
+      itemWidgets[itemIndex] =
+          getItemWidget(itemIndex, expandedState, deletionState);
     });
   }
 
   // returns a widget that represents a business item
-  Widget getItemWidget(int i, bool isExpanded) {
+  Widget getItemWidget(int i, bool isExpanded, bool isDeleting) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Container(
@@ -97,13 +136,30 @@ class _ItemPageState extends State<ItemPage> {
                     color: Color.fromARGB(255, 255, 255, 255),
                   ),
                 ),
-                IconButton(
-                  onPressed: () => {deleteItem(i)},
-                  icon: const Icon(
-                    Icons.delete,
-                    color: Color.fromARGB(255, 255, 0, 0),
+                if (!isDeleting)
+                  IconButton(
+                    onPressed: () => {toggleItemDeletionPrompt(i)},
+                    icon: const Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                    ),
                   ),
-                ),
+                if (isDeleting)
+                  IconButton(
+                    onPressed: () => {deleteItem(i)},
+                    icon: const Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                    ),
+                  ),
+                if (isDeleting)
+                  IconButton(
+                    onPressed: () => {toggleItemDeletionPrompt(i)},
+                    icon: const Icon(
+                      Icons.cancel,
+                      color: Colors.red,
+                    ),
+                  ),
               ],
             ),
             if (isExpanded)
@@ -225,6 +281,19 @@ class _ItemPageState extends State<ItemPage> {
           ),
           Column(
             children: itemWidgets,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              eventMessage,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: eventMessageColor,
+                fontSize: 20,
+              ),
+            ),
           ),
         ],
       ),

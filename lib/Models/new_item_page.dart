@@ -164,6 +164,7 @@ class _NewItemPageState extends State<NewItemPage> {
                     onChanged: (value) {
                       setState(() {
                         taxable = value!;
+                        print(taxable);
                       });
                     },
                   ),
@@ -172,7 +173,7 @@ class _NewItemPageState extends State<NewItemPage> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.done),
+            icon: const Icon(Icons.check_circle),
             onPressed: createItem,
             color: const Color.fromARGB(255, 0, 150, 10),
             iconSize: 50,
