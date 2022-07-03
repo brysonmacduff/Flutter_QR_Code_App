@@ -1,3 +1,4 @@
+import 'package:ceg4912_project/Models/new_item_page.dart';
 import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:flutter/material.dart';
@@ -47,8 +48,15 @@ class _ItemPageState extends State<ItemPage> {
     print("items length = " + itemWidgets.length.toString());
   }
 
-  // creates a new business item for the current merchant
-  void createItem() {}
+  // redirect to the new_item_page to create a new business item
+  void createItem() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const NewItemPage(),
+      ),
+    );
+  }
 
   // permanently deletes an item
   void deleteItem(int itemIndex) {}
@@ -86,7 +94,7 @@ class _ItemPageState extends State<ItemPage> {
                   onPressed: () => {expandItem(i)},
                   icon: const Icon(
                     Icons.description,
-                    color: Color.fromARGB(255, 0, 0, 0),
+                    color: Color.fromARGB(255, 255, 255, 255),
                   ),
                 ),
                 IconButton(
@@ -141,7 +149,7 @@ class _ItemPageState extends State<ItemPage> {
                         children: [
                           Flexible(
                             child: Text(
-                              "Category: " + items[i].getCategoryString(),
+                              "Category: " + items[i].getCategoryFormatted(),
                               style: const TextStyle(
                                 color: Color.fromARGB(255, 255, 255, 255),
                               ),
@@ -173,7 +181,7 @@ class _ItemPageState extends State<ItemPage> {
                         children: [
                           Flexible(
                             child: Text(
-                              "Taxable: " + items[i].isTaxableString(),
+                              "Taxable: " + items[i].isTaxableFormatted(),
                               style: const TextStyle(
                                 color: Color.fromARGB(255, 255, 255, 255),
                               ),
@@ -203,13 +211,15 @@ class _ItemPageState extends State<ItemPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              TextButton(
+              IconButton(
                 onPressed: getItems,
-                child: const Text("Refresh"),
+                icon: const Icon(Icons.refresh),
+                color: const Color.fromARGB(255, 46, 73, 107),
               ),
-              TextButton(
+              IconButton(
                 onPressed: createItem,
-                child: const Text("Create Item"),
+                icon: const Icon(Icons.add),
+                color: const Color.fromARGB(255, 46, 73, 107),
               ),
             ],
           ),

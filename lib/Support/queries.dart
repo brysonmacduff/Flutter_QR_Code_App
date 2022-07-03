@@ -243,4 +243,49 @@ class Queries {
       return null;
     }
   }
+
+  static _getMaxItemId(MySqlConnection conn) async {
+    String query = "select max(iId) as maxId from item";
+    return await conn.query(query);
+  }
+
+  static insertItem(
+      MySqlConnection conn,
+      int merchantId,
+      String name,
+      String details,
+      String code,
+      Categories category,
+      String price,
+      bool taxable) async {
+    try {
+      var result = await _getMaxItemId(conn);
+      int maxId = result.first["maxId"];
+      String nextId = (maxId + 1).toString();
+
+      String query = "insert into item values ('" +
+          nextId +
+          "','" +
+          merchantId.toString() +
+          "','" +
+          name +
+          "','" +
+          code +
+          "','" +
+          details +
+          "','" +
+          Item.getFormattedCategoryByParameter(category) +
+          "','" +
+          price +
+          "','" +
+          taxable.toString() +
+          "')";
+
+      await conn.query(query);
+      return true;
+    } catch (e) {
+      print("insertItem(): " + e.toString());
+      return false;
+    }
+  }
 }

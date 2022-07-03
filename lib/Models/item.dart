@@ -47,8 +47,20 @@ class Item {
     return _category;
   }
 
-  String getCategoryString() {
-    return "None";
+  String getCategoryFormatted() {
+    if (_category == Categories.none) {
+      return "None";
+    } else {
+      return "N/A";
+    }
+  }
+
+  static String getFormattedCategoryByParameter(Categories c) {
+    if (c == Categories.none) {
+      return "None";
+    } else {
+      return "N/A";
+    }
   }
 
   double getPrice() {
@@ -59,7 +71,7 @@ class Item {
     return _taxable;
   }
 
-  String isTaxableString() {
+  String isTaxableFormatted() {
     if (_taxable) {
       return "Yes";
     } else {
