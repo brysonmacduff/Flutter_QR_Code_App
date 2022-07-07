@@ -1,57 +1,76 @@
-import 'package:ceg4912_project/Models/edit_item_page.dart';
-import 'package:ceg4912_project/Models/item.dart';
-import 'package:ceg4912_project/Support/session.dart';
-import 'package:flutter/material.dart';
 import 'package:ceg4912_project/Support/queries.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:ceg4912_project/Models/item.dart';
 
-class NewItemPage extends StatefulWidget {
-  const NewItemPage({Key? key}) : super(key: key);
+class EditItemPage extends StatefulWidget {
+  const EditItemPage({Key? key}) : super(key: key);
+
+  static Item _currentItem = Item.empty();
+
+  static void setCurrentItem(Item item) {
+    _currentItem = item;
+  }
+
+  static Item getCurrentItem() {
+    return _currentItem;
+  }
 
   @override
-  State<NewItemPage> createState() => _NewItemPageState();
+  State<EditItemPage> createState() => _EditItemPageState();
 }
 
-class _NewItemPageState extends State<NewItemPage> {
+class _EditItemPageState extends State<EditItemPage> {
+  // this is initialized on load of the page (probably)
+  Item currentItem = EditItemPage.getCurrentItem();
+
   String itemName = "";
-  Categories category = Categories.none;
   String details = "";
   String code = "";
   String price = "";
-  bool taxable = true;
 
-  String createItemEventMessage = "";
-  Color createItemEventColor = Colors.white;
+  String eventMessage = "";
+  Color eventMessageColor = Colors.white;
+  // Used for setting the values of the input fields. They must be populated with the existing item data before editing.
+  var nameTEC =
+      TextEditingController(text: EditItemPage.getCurrentItem().getName());
+  var detailsTEC =
+      TextEditingController(text: EditItemPage.getCurrentItem().getDetails());
+  var codeTEC =
+      TextEditingController(text: EditItemPage.getCurrentItem().getCode());
+  var priceTEC = TextEditingController(
+      text: EditItemPage.getCurrentItem().getPrice().toString());
 
-  // attempts to create a new item for this merchant
-  void createItem() async {
-    var conn = await Queries.getConnection();
-
+  // overwrites the current item's attributes in the database
+  void editItem() async {
     if (!areItemFieldsValid()) {
       setState(() {
-        createItemEventMessage = "Item Data is Invalid";
-        createItemEventColor = Colors.red;
+        eventMessage = "Item Data is Invalid";
+        eventMessageColor = Colors.red;
       });
       return;
     }
 
-    var result = await Queries.insertItem(
-        conn,
-        Session.getSessionUser().getId(),
+    currentItem = Item.all(
+        currentItem.getItemId(),
+        currentItem.getMerchantId(),
         itemName,
-        details,
         code,
-        category,
-        price,
-        taxable);
+        details,
+        currentItem.getCategory(),
+        double.parse(price),
+        currentItem.isTaxable());
+
+    var conn = await Queries.getConnection();
+    var result = await Queries.editItem(conn, currentItem);
 
     setState(() {
-      if (!result) {
-        createItemEventMessage = "Failed to Create Item";
-        createItemEventColor = Colors.red;
+      if (result) {
+        eventMessage = "Edit Complete";
+        eventMessageColor = Colors.green;
       } else {
-        createItemEventMessage = "Item Has Been Created";
-        createItemEventColor = Colors.green;
+        eventMessage = "Edit Failed";
+        eventMessageColor = Colors.red;
       }
     });
   }
@@ -83,7 +102,7 @@ class _NewItemPageState extends State<NewItemPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("New Item Page"),
+        title: const Text("Edit Item Page"),
         backgroundColor: const Color.fromARGB(255, 46, 73, 107),
       ),
       body: ListView(
@@ -93,20 +112,30 @@ class _NewItemPageState extends State<NewItemPage> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
+                controller: nameTEC,
                 decoration: const InputDecoration(labelText: "Item Name"),
-                onChanged: (value) => itemName = value),
+                onChanged: (value) {
+                  itemName = value;
+                }),
           ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
+                controller: detailsTEC,
                 decoration: const InputDecoration(labelText: "Details"),
-                onChanged: (value) => details = value),
+                onChanged: (value) {
+                  details = value;
+                }),
           ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
-                decoration: const InputDecoration(labelText: "Code"),
-                onChanged: (value) => code = value),
+              controller: codeTEC,
+              decoration: const InputDecoration(labelText: "Code"),
+              onChanged: (value) {
+                code = value;
+              },
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(16),
@@ -122,11 +151,11 @@ class _NewItemPageState extends State<NewItemPage> {
               onChanged: (String? newValue) {
                 setState(() {
                   if (newValue == "None") {
-                    category = Categories.none;
+                    currentItem.setCategory(Categories.none);
                   }
                 });
               },
-              value: Item.getFormattedCategoryByParameter(category),
+              value: currentItem.getCategoryFormatted(),
             ),
           ),
           Padding(
@@ -136,8 +165,11 @@ class _NewItemPageState extends State<NewItemPage> {
                 signed: false,
                 decimal: true,
               ),
+              controller: priceTEC,
               decoration: const InputDecoration(labelText: "Price"),
-              onChanged: (value) => price = value,
+              onChanged: (value) {
+                price = value;
+              },
             ),
           ),
           Padding(
@@ -158,14 +190,13 @@ class _NewItemPageState extends State<NewItemPage> {
                     ),
                   ),
                   Checkbox(
-                    value: taxable,
+                    value: currentItem.isTaxable(),
                     side: const BorderSide(
                       color: Color.fromARGB(255, 255, 255, 255),
                     ),
                     onChanged: (value) {
                       setState(() {
-                        taxable = value!;
-                        print(taxable);
+                        currentItem.setTaxable(value!);
                       });
                     },
                   ),
@@ -175,19 +206,19 @@ class _NewItemPageState extends State<NewItemPage> {
           ),
           IconButton(
             icon: const Icon(Icons.check_circle),
-            onPressed: createItem,
+            onPressed: editItem,
             color: const Color.fromARGB(255, 0, 150, 10),
             iconSize: 50,
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              createItemEventMessage,
+              eventMessage,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: createItemEventColor,
+                color: eventMessageColor,
                 fontSize: 20,
               ),
             ),

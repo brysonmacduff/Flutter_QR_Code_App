@@ -1,3 +1,4 @@
+import 'package:ceg4912_project/Models/edit_item_page.dart';
 import 'package:ceg4912_project/Models/new_item_page.dart';
 import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/Support/session.dart';
@@ -109,6 +110,19 @@ class _ItemPageState extends State<ItemPage> {
     });
   }
 
+  // routes to the edit_item_page to edit the selected item
+  void editItem(int itemIndex) {
+    Item selectedItem = items[itemIndex];
+    EditItemPage.setCurrentItem(selectedItem);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const EditItemPage(),
+      ),
+    );
+  }
+
   // returns a widget that represents a business item
   Widget getItemWidget(int i, bool isExpanded, bool isDeleting) {
     return Padding(
@@ -133,6 +147,13 @@ class _ItemPageState extends State<ItemPage> {
                   onPressed: () => {expandItem(i)},
                   icon: const Icon(
                     Icons.description,
+                    color: Color.fromARGB(255, 255, 255, 255),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => {editItem(i)},
+                  icon: const Icon(
+                    Icons.edit,
                     color: Color.fromARGB(255, 255, 255, 255),
                   ),
                 ),

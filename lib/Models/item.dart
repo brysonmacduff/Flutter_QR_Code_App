@@ -35,16 +35,32 @@ class Item {
     return _name;
   }
 
+  void setName(String name) {
+    _name = name;
+  }
+
   String getCode() {
     return _code;
+  }
+
+  void setCode(String code) {
+    _code = code;
   }
 
   String getDetails() {
     return _details;
   }
 
+  void setDetails(String details) {
+    _details = details;
+  }
+
   Categories getCategory() {
     return _category;
+  }
+
+  void setCategory(Categories cat) {
+    _category = cat;
   }
 
   String getCategoryFormatted() {
@@ -67,8 +83,16 @@ class Item {
     return _price;
   }
 
+  void setPrice(double p) {
+    _price = p;
+  }
+
   bool isTaxable() {
     return _taxable;
+  }
+
+  void setTaxable(bool t) {
+    _taxable = t;
   }
 
   String isTaxableFormatted() {

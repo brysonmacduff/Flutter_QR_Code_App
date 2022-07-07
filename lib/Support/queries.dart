@@ -296,6 +296,37 @@ class Queries {
     }
   }
 
+  // edits an item in the database
+  static editItem(MySqlConnection conn, Item item) async {
+    try {
+      int nTaxable = 1;
+      if (!item.isTaxable()) {
+        nTaxable = 0;
+      }
+
+      String query = "update item set iName='" +
+          item.getName() +
+          "', iCode='" +
+          item.getCode() +
+          "', iDetails='" +
+          item.getDetails() +
+          "', iCategory='" +
+          item.getCategoryFormatted() +
+          "', iPrice=" +
+          item.getPrice().toString() +
+          ", iTaxable=" +
+          nTaxable.toString() +
+          " where iId=" +
+          item.getItemId().toString();
+
+      await conn.query(query);
+      return true;
+    } catch (e) {
+      print("editItem(): " + e.toString());
+      return false;
+    }
+  }
+
   // deletes an item by specifying its primary key id
   static deleteItem(MySqlConnection conn, int itemId) async {
     try {
