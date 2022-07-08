@@ -24,14 +24,15 @@ class _EditItemPageState extends State<EditItemPage> {
   // this is initialized on load of the page (probably)
   Item currentItem = EditItemPage.getCurrentItem();
 
-  String itemName = "";
-  String details = "";
-  String code = "";
-  String price = "";
+  // the starting value of the input field variables
+  String itemName = EditItemPage.getCurrentItem().getName();
+  String details = EditItemPage.getCurrentItem().getDetails();
+  String code = EditItemPage.getCurrentItem().getCode();
+  String price = EditItemPage.getCurrentItem().getPrice().toString();
 
   String eventMessage = "";
   Color eventMessageColor = Colors.white;
-  // Used for setting the values of the input fields. They must be populated with the existing item data before editing.
+  // Used for setting the values of the input fields. They must be initially populated with the existing item data before editing.
   var nameTEC =
       TextEditingController(text: EditItemPage.getCurrentItem().getName());
   var detailsTEC =
@@ -41,7 +42,7 @@ class _EditItemPageState extends State<EditItemPage> {
   var priceTEC = TextEditingController(
       text: EditItemPage.getCurrentItem().getPrice().toString());
 
-  // overwrites the current item's attributes in the database
+  // overwrites the current item's attributes in the database and here locally
   void editItem() async {
     if (!areItemFieldsValid()) {
       setState(() {
@@ -204,11 +205,14 @@ class _EditItemPageState extends State<EditItemPage> {
               ),
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.check_circle),
+          TextButton(
             onPressed: editItem,
-            color: const Color.fromARGB(255, 0, 150, 10),
-            iconSize: 50,
+            child: const Text(
+              "Submit",
+              style: TextStyle(
+                color: Colors.blue,
+              ),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),

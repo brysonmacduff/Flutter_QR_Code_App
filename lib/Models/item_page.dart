@@ -30,6 +30,13 @@ class _ItemPageState extends State<ItemPage> {
   // the message that is displayed to the user to inform them of events
   String eventMessage = "";
 
+  // initially get the merchant's business items upon loading the item page
+  @override
+  void initState() {
+    super.initState();
+    getItems();
+  }
+
   // generates widgets for all of the current merchant's business items
   void getItems() async {
     int mId = Session.getSessionUser().getId();
@@ -66,7 +73,7 @@ class _ItemPageState extends State<ItemPage> {
       MaterialPageRoute(
         builder: (_) => const NewItemPage(),
       ),
-    );
+    ).then((value) => getItems());
   }
 
   // permanently deletes an item from the database
@@ -83,7 +90,7 @@ class _ItemPageState extends State<ItemPage> {
       }
 
       // remove the widget from the UI that represented the deleted item
-      // refresh the items page after a deleteion
+      // refresh the items page after a deletion
       getItems();
     });
   }
@@ -120,7 +127,7 @@ class _ItemPageState extends State<ItemPage> {
       MaterialPageRoute(
         builder: (_) => const EditItemPage(),
       ),
-    );
+    ).then((value) => getItems());
   }
 
   // returns a widget that represents a business item
@@ -137,6 +144,7 @@ class _ItemPageState extends State<ItemPage> {
                 Flexible(
                   child: Text(
                     items[i].getName(),
+                    textAlign: TextAlign.start,
                     style: const TextStyle(
                       color: Color.fromARGB(255, 255, 255, 255),
                       fontSize: 20,
@@ -147,14 +155,14 @@ class _ItemPageState extends State<ItemPage> {
                   onPressed: () => {expandItem(i)},
                   icon: const Icon(
                     Icons.description,
-                    color: Color.fromARGB(255, 255, 255, 255),
+                    color: Colors.blue,
                   ),
                 ),
                 IconButton(
                   onPressed: () => {editItem(i)},
                   icon: const Icon(
                     Icons.edit,
-                    color: Color.fromARGB(255, 255, 255, 255),
+                    color: Colors.blue,
                   ),
                 ),
                 if (!isDeleting)
@@ -194,7 +202,7 @@ class _ItemPageState extends State<ItemPage> {
                         children: [
                           Flexible(
                             child: Text(
-                              "Details: " + items[i].getDetails(),
+                              "DETAILS: " + items[i].getDetails(),
                               style: const TextStyle(
                                 color: Color.fromARGB(255, 255, 255, 255),
                               ),
@@ -210,7 +218,7 @@ class _ItemPageState extends State<ItemPage> {
                         children: [
                           Flexible(
                             child: Text(
-                              "Code: " + items[i].getCode(),
+                              "CODE: " + items[i].getCode(),
                               style: const TextStyle(
                                 color: Color.fromARGB(255, 255, 255, 255),
                               ),
@@ -226,7 +234,7 @@ class _ItemPageState extends State<ItemPage> {
                         children: [
                           Flexible(
                             child: Text(
-                              "Category: " + items[i].getCategoryFormatted(),
+                              "CATEGORY: " + items[i].getCategoryFormatted(),
                               style: const TextStyle(
                                 color: Color.fromARGB(255, 255, 255, 255),
                               ),
@@ -242,7 +250,7 @@ class _ItemPageState extends State<ItemPage> {
                         children: [
                           Flexible(
                             child: Text(
-                              "Price: \$" + items[i].getPrice().toString(),
+                              "PRICE: \$" + items[i].getPrice().toString(),
                               style: const TextStyle(
                                 color: Color.fromARGB(255, 255, 255, 255),
                               ),
@@ -258,7 +266,7 @@ class _ItemPageState extends State<ItemPage> {
                         children: [
                           Flexible(
                             child: Text(
-                              "Taxable: " + items[i].isTaxableFormatted(),
+                              "TAXABLE: " + items[i].isTaxableFormatted(),
                               style: const TextStyle(
                                 color: Color.fromARGB(255, 255, 255, 255),
                               ),
@@ -291,13 +299,13 @@ class _ItemPageState extends State<ItemPage> {
               IconButton(
                 onPressed: getItems,
                 icon: const Icon(Icons.refresh),
-                color: const Color.fromARGB(255, 46, 73, 107),
+                color: Colors.blue,
               ),
-              IconButton(
+              /*IconButton(
                 onPressed: createItem,
                 icon: const Icon(Icons.add),
                 color: const Color.fromARGB(255, 46, 73, 107),
-              ),
+              ),*/
             ],
           ),
           Column(
@@ -318,6 +326,15 @@ class _ItemPageState extends State<ItemPage> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: createItem,
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+        backgroundColor: Colors.blue,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
     );
   }
 }

@@ -173,11 +173,14 @@ class _NewItemPageState extends State<NewItemPage> {
               ),
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.check_circle),
+          TextButton(
             onPressed: createItem,
-            color: const Color.fromARGB(255, 0, 150, 10),
-            iconSize: 50,
+            child: const Text(
+              "Submit",
+              style: TextStyle(
+                color: Colors.blue,
+              ),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
