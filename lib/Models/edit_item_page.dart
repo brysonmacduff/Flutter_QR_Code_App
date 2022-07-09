@@ -49,6 +49,9 @@ class _EditItemPageState extends State<EditItemPage> {
         eventMessage = "Item Data is Invalid";
         eventMessageColor = Colors.red;
       });
+
+      // message will be cleared after 2 seconds
+      clearEventMessage(2000);
       return;
     }
 
@@ -73,6 +76,19 @@ class _EditItemPageState extends State<EditItemPage> {
         eventMessage = "Edit Failed";
         eventMessageColor = Colors.red;
       }
+    });
+
+    // message will be cleared after 2 seconds
+    clearEventMessage(2000);
+  }
+
+  // clears the event message after some time has passed
+  void clearEventMessage(int delay) {
+    Future.delayed(Duration(milliseconds: delay), () {
+      setState(() {
+        eventMessage = "";
+        eventMessageColor = Colors.white;
+      });
     });
   }
 

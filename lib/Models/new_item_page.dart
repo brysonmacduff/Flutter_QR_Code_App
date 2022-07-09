@@ -32,6 +32,9 @@ class _NewItemPageState extends State<NewItemPage> {
         createItemEventMessage = "Item Data is Invalid";
         createItemEventColor = Colors.red;
       });
+
+      // clears the event message after 2 seconds have passed
+      clearEventMessage(2000);
       return;
     }
 
@@ -54,6 +57,9 @@ class _NewItemPageState extends State<NewItemPage> {
         createItemEventColor = Colors.green;
       }
     });
+
+    // clears the event message after 2 seconds have passed
+    clearEventMessage(2000);
   }
 
   // checks if all of the user's input data for the item is valid
@@ -77,6 +83,16 @@ class _NewItemPageState extends State<NewItemPage> {
       return false;
     }
     return true;
+  }
+
+  // clears the event message after some time has passed
+  void clearEventMessage(int delay) {
+    Future.delayed(Duration(milliseconds: delay), () {
+      setState(() {
+        createItemEventMessage = "";
+        createItemEventColor = Colors.white;
+      });
+    });
   }
 
   @override

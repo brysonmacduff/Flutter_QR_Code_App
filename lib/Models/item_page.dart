@@ -45,6 +45,13 @@ class _ItemPageState extends State<ItemPage> {
 
     // if the query went wrong then it would return null
     if (mItems == null) {
+      setState(() {
+        eventMessage = "Item Retrieval Failed.";
+        eventMessageColor = Colors.red;
+      });
+
+      // clears the event message after 2 seconds have passed
+      clearEventMessage(2000);
       return;
     }
 
@@ -63,7 +70,6 @@ class _ItemPageState extends State<ItemPage> {
         itemWidgets.add(getItemWidget(i, false, false));
       });
     }
-    print("items length = " + itemWidgets.length.toString());
   }
 
   // redirect to the new_item_page to create a new business item
@@ -86,6 +92,8 @@ class _ItemPageState extends State<ItemPage> {
       if (!result) {
         eventMessage = "Item Deletion Failed";
         eventMessageColor = Colors.red;
+        // clears the event message after 2 seconds have passed
+        clearEventMessage(2000);
         return;
       }
 
@@ -128,6 +136,16 @@ class _ItemPageState extends State<ItemPage> {
         builder: (_) => const EditItemPage(),
       ),
     ).then((value) => getItems());
+  }
+
+  // clears the event message after some time has passed
+  void clearEventMessage(int delay) {
+    Future.delayed(Duration(milliseconds: delay), () {
+      setState(() {
+        eventMessage = "";
+        eventMessageColor = Colors.white;
+      });
+    });
   }
 
   // returns a widget that represents a business item
