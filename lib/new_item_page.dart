@@ -1,4 +1,4 @@
-import 'package:ceg4912_project/Models/edit_item_page.dart';
+import 'package:ceg4912_project/edit_item_page.dart';
 import 'package:ceg4912_project/Models/item.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:flutter/material.dart';
