@@ -16,6 +16,7 @@ import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Models/user.dart';
 
 import 'Models/item_page.dart';
+import 'Models/merchant_receipt_history.dart';
 
 class LogInPageRoute extends StatelessWidget {
   const LogInPageRoute({Key? key}) : super(key: key);
@@ -86,6 +87,16 @@ class _LogInPageState extends State<LogInPage> {
     );
   }
 
+  // redirect to the receipt history page
+  void receiptHistoryPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const MerchantReceiptHistoryPage(),
+      ),
+    );
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -114,6 +125,10 @@ class _LogInPageState extends State<LogInPage> {
             TextButton(
               onPressed: itemPage,
               child: const Text("Item Page (Dev Mode)"),
+            ),
+            TextButton(
+              onPressed: receiptHistoryPage,
+              child: const Text("Receipt History (Dev Mode)"),
             ),
             TextButton(
               onPressed: () {

@@ -1,6 +1,7 @@
 import 'package:ceg4912_project/Models/customer.dart';
 import 'package:ceg4912_project/Models/item.dart';
 import 'package:ceg4912_project/Models/merchant.dart';
+import 'package:ceg4912_project/Models/receipt.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:ceg4912_project/Models/user.dart';
@@ -337,6 +338,35 @@ class Queries {
     } catch (e) {
       print("delteItem(): " + e.toString());
       return false;
+    }
+  }
+
+  static getMerchantReceipts(MySqlConnection conn, int mId) async {
+    String query = "select * from item where mId = '" + mId.toString() + "'";
+
+    // result rows are in JSON format
+    try {
+      List<Receipt> receipts = <Receipt>[];
+      var results = await conn.query(query);
+      var iterator = results.iterator;
+
+      while (iterator.moveNext()) {
+        var result = iterator.current;
+
+        int rId = result["rId"];
+        String dateTime = result["rDateTime"];
+        double cost = result["rCost"];
+        int mId = result["mid"];
+        int cId = result["cid"];
+
+        receipts.add(Receipt.all(
+            rId, dateTime, cost, mId, cId));
+      }
+
+      return receipts;
+    } catch (e) {
+      print(e);
+      return null;
     }
   }
 }
