@@ -23,6 +23,7 @@ class Filter extends StatefulWidget {
   State<StatefulWidget> createState() => _FilterState();
 }
 
+//Class for the filter functionality
 class _FilterState extends State<Filter> {
   // contains the choices
   final List<String> _selectedFilterOptions = [];
@@ -38,7 +39,7 @@ class _FilterState extends State<Filter> {
     });
   }
 
-  // called when user sumbits their choices
+  // called when user submits their choices
   void _submit() {
     Navigator.pop(context, _selectedFilterOptions);
   }
@@ -59,7 +60,7 @@ class _FilterState extends State<Filter> {
               title: Text(choice),
               controlAffinity: ListTileControlAffinity.leading,
               onChanged: (isChecked) => _selected(choice, isChecked!),
-          ))
+          ),)
               .toList(),
         ),
       ),
@@ -84,6 +85,7 @@ class MerchantReceiptHistoryPage extends StatefulWidget {
   _ReceiptHistoryState createState() => _ReceiptHistoryState();
 }
 
+//Class for the receipt history state
 class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
   // list of selected filters
   List<String> _choices = [];
@@ -91,9 +93,9 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
   //New
   // list of receipts
   List<Receipt> receipts = <Receipt>[];
-  // stores the UI widgets that represent merchant's items
+  // stores the UI widgets that represent merchant's receipts
   List<Widget> receiptWidgets = <Widget>[];
-  // keeps track of which item widgets are expanded in the UI
+  // keeps track of which receipt widgets are expanded in the UI
   List<bool> receiptExpandedStateSet = <bool>[];
 
   // the color of event messages that are displayed to the user
@@ -101,14 +103,14 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
   // the message that is displayed to the user to inform them of events
   String eventMessage = "";
 
-  // initially get the merchant's business items upon loading the item page
+  // initially get the merchant's receipts upon loading the receipt page
   @override
   void initState() {
     super.initState();
     _getReceipts();
   }
 
-  // generates widgets for all of the current merchant's business items
+  // generates widgets for all of the current merchant's business receipt
   void _getReceipts() async {
     int mId = Session.getSessionUser().getId();
     var conn = await Queries.getConnection();
@@ -117,7 +119,7 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
     // if the query went wrong then it would return null
     if (mReceipts == null) {
       setState(() {
-        eventMessage = "Item Retrieval Failed.";
+        eventMessage = "Receipt Retrieval Failed.";
         eventMessageColor = Colors.red;
       });
 
@@ -126,7 +128,7 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
       return;
     }
 
-    // upon refresh, reset the lists that keeps track of the items that are showing on the UI
+    // upon refresh, reset the lists that keeps track of the receipts that are showing on the UI
     receipts.clear();
     receiptWidgets.clear();
     receiptExpandedStateSet.clear();
@@ -152,16 +154,16 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
   }
 
   // expands the full details of an item to the UI
-  void expandItem(int itemIndex) {
-    bool expandedState = !receiptExpandedStateSet[itemIndex]; // invert the state
-    receiptExpandedStateSet[itemIndex] = expandedState;
+  void expandReceipt(int receiptIndex) {
+    bool expandedState = !receiptExpandedStateSet[receiptIndex]; // invert the state
+    receiptExpandedStateSet[receiptIndex] = expandedState;
     setState(() {
-      receiptWidgets[itemIndex] =
-          getReceiptWidget(itemIndex, expandedState);
+      receiptWidgets[receiptIndex] =
+          getReceiptWidget(receiptIndex, expandedState);
     });
   }
 
-  // returns a widget that represents a business item
+  // returns a widget that represents a receipt
   Widget getReceiptWidget(int i, bool isExpanded) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -174,7 +176,7 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
               children: [
                 Flexible(
                   child: Text(
-                    receipts[i].getId().toString(),
+                    "Receipt ID: " + receipts[i].getId().toString(),
                     textAlign: TextAlign.start,
                     style: const TextStyle(
                       color: Color.fromARGB(255, 255, 255, 255),
@@ -183,7 +185,7 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
                   ),
                 ),
                 IconButton(
-                  onPressed: () => {expandItem(i)},
+                  onPressed: () => {expandReceipt(i)},
                   icon: const Icon(
                     Icons.description,
                     color: Colors.blue,
@@ -234,7 +236,7 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
                         children: [
                           Flexible(
                             child: Text(
-                              "DATE: " + receipts[i].getDateTime(),
+                              "DATE: " + receipts[i].getDateTime().toString(),
                               style: const TextStyle(
                                 color: Color.fromARGB(255, 255, 255, 255),
                               ),
@@ -318,7 +320,7 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
             const Divider(
               height: 30,
             ),
-            // display selected items
+            // display selected receipts
             Wrap(
               children: _choices
                   .map((e) => Chip(
@@ -329,6 +331,22 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
             ElevatedButton(
               child: const Text('Get Receipts'),
               onPressed: _getReceipts,
+            ),
+            Column(
+              children: receiptWidgets,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                eventMessage,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: eventMessageColor,
+                  fontSize: 20,
+                ),
+              ),
             ),
           ],
         ),

@@ -342,7 +342,7 @@ class Queries {
   }
 
   static getMerchantReceipts(MySqlConnection conn, int mId) async {
-    String query = "select * from item where mId = '" + mId.toString() + "'";
+    String query = "select * from receipt where mid = '" + mId.toString() + "'";
 
     // result rows are in JSON format
     try {
@@ -353,9 +353,9 @@ class Queries {
       while (iterator.moveNext()) {
         var result = iterator.current;
 
-        int rId = result["rId"];
-        String dateTime = result["rDateTime"];
-        double cost = result["rCost"];
+        int rId = result["rid"];
+        DateTime dateTime = result["rDateTime"];
+        double cost = double.parse(result["rCost"]);
         int mId = result["mid"];
         int cId = result["cid"];
 
