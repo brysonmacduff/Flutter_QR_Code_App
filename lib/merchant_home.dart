@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:ceg4912_project/item_page.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Support/utility.dart';
@@ -24,19 +26,13 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
     );
   }
 
-  void loadReceiptPage() {
-    // Does nothing right now. WIP.
-    // The pop is needed since this function's button is inside another BuildContext. This closes the PopupMenu.
-    Navigator.pop(context);
-  }
+  void loadReceiptPage() {}
 
-  void loadReceiptHistoryPage() {
-    // Does nothing right now. WIP.
-    // The pop is needed since this function's button is inside another BuildContext. This closes the PopupMenu.
-    Navigator.pop(context);
-  }
+  void loadReceiptHistoryPage() {}
 
-  void loadMerchantAccountPage() {
+  void loadMerchantAccountPage() {}
+
+  void loadSettings() {
     // Does nothing right now. WIP.
     // The pop is needed since this function's button is inside another BuildContext. This closes the PopupMenu.
     Navigator.pop(context);
@@ -45,7 +41,6 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
   // clears the session user and returns to the sign in page
   void signOut() {
     Session.clearSessionUser();
-    // two pops are needed since the signOut button is inside another BuildContext
     Navigator.pop(context);
     Navigator.pop(context);
   }
@@ -66,39 +61,9 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
                   child: InkWell(
                     splashColor: Colors.grey,
                     child: IconButton(
-                      icon: const Icon(Icons.account_circle),
+                      icon: const Icon(Icons.settings),
                       color: Colors.white,
-                      onPressed: loadMerchantAccountPage,
-                    ),
-                  ),
-                ),
-                PopupMenuItem(
-                  child: InkWell(
-                    splashColor: Colors.grey,
-                    child: IconButton(
-                      icon: const Icon(Icons.shop_2_rounded),
-                      color: Colors.white,
-                      onPressed: loadItemPage,
-                    ),
-                  ),
-                ),
-                PopupMenuItem(
-                  child: InkWell(
-                    splashColor: Colors.grey,
-                    child: IconButton(
-                      icon: const Icon(Icons.receipt_rounded),
-                      color: Colors.white,
-                      onPressed: loadReceiptPage,
-                    ),
-                  ),
-                ),
-                PopupMenuItem(
-                  child: InkWell(
-                    splashColor: Colors.grey,
-                    child: IconButton(
-                      icon: const Icon(Icons.history_rounded),
-                      color: Colors.white,
-                      onPressed: loadReceiptHistoryPage,
+                      onPressed: loadSettings,
                     ),
                   ),
                 ),
@@ -115,6 +80,84 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
               ];
             },
           )
+        ],
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            color: Colors.blue,
+            width: MediaQuery.of(context).size.width,
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                Session.getSessionUser().getEmail(),
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white, fontSize: 20),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(8),
+              children: [
+                Container(
+                  margin: const EdgeInsets.all(8),
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height / 4.5,
+                  color: Utility.getBackGroundColor(),
+                  child: TextButton(
+                    onPressed: loadMerchantAccountPage,
+                    child: const Text(
+                      "Account",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.all(8),
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height / 4.5,
+                  color: Utility.getBackGroundColor(),
+                  child: TextButton(
+                    onPressed: loadItemPage,
+                    child: const Text(
+                      "Business Items",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.all(8),
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height / 4.5,
+                  color: Utility.getBackGroundColor(),
+                  child: TextButton(
+                    onPressed: loadReceiptPage,
+                    child: const Text(
+                      "Create Receipt",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.all(8),
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height / 4.5,
+                  color: Utility.getBackGroundColor(),
+                  child: TextButton(
+                    onPressed: loadReceiptHistoryPage,
+                    child: const Text(
+                      "Receipt History",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
