@@ -15,7 +15,7 @@ class MerchantReceiptPage extends StatefulWidget {
 }
 
 class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
-  List<Widget> receiptItemWidgets = List<Widget>.empty(growable: true);
+  Map<int, Widget> receiptItemWidgets = Map<int, Widget>();
 
   // reset the current receipt item list and clear the UI
   void clearReceiptItems() {
@@ -46,18 +46,21 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
   void finishReceipt() {}
 
   // gets a complete list of UI widgets for each of the receipt items
-  List<Widget> getReceiptItemWidgets() {
-    List<Widget> widgets = List<Widget>.empty(growable: true);
+  Map<int, Widget> getReceiptItemWidgets() {
+    Map<int, Widget> pairs = Map<int, Widget>();
     for (int i = 0; i < MerchantReceiptPage.receiptItems.length; i++) {
-      widgets.add(getReceiptItemWidget(i));
+      ReceiptItem ri = MerchantReceiptPage.receiptItems[i];
+      int id = ri.getItem().getItemId();
+      Widget widget = getReceiptItemWidget(ri);
+      final pair = <int, Widget>{id: widget};
+      pairs.addAll(pair);
     }
-    print("receipt item widget count: " + widgets.length.toString());
-    return widgets;
+    print("receipt item widget count: " + pairs.length.toString());
+    return pairs;
   }
 
   // returns a single receipt item widget
-  Widget getReceiptItemWidget(int i) {
-    ReceiptItem ri = MerchantReceiptPage.receiptItems[i];
+  Widget getReceiptItemWidget(ReceiptItem ri) {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Container(
@@ -106,8 +109,9 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
 
   // increment the quanitity value of a receipt item
   void incrementReceiptItem(int itemId) {
+    ReceiptItem ri = MerchantReceiptPage.receiptItems[0];
     for (int i = 0; i < MerchantReceiptPage.receiptItems.length; i++) {
-      ReceiptItem ri = MerchantReceiptPage.receiptItems[i];
+      ri = MerchantReceiptPage.receiptItems[i];
       if (ri.getItem().getItemId() == itemId) {
         ri.incrementQuantity();
         MerchantReceiptPage.receiptItems[i] = ri;
@@ -116,15 +120,15 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
     }
 
     setState(() {
-      receiptItemWidgets.clear();
-      receiptItemWidgets = getReceiptItemWidgets();
+      receiptItemWidgets[itemId] = getReceiptItemWidget(ri);
     });
   }
 
   // decrement the quanitity value of a receipt item
   void decrementReceiptItem(int itemId) {
+    ReceiptItem ri = MerchantReceiptPage.receiptItems[0];
     for (int i = 0; i < MerchantReceiptPage.receiptItems.length; i++) {
-      ReceiptItem ri = MerchantReceiptPage.receiptItems[i];
+      ri = MerchantReceiptPage.receiptItems[i];
       if (ri.getItem().getItemId() == itemId) {
         ri.decrementQuantity();
         MerchantReceiptPage.receiptItems[i] = ri;
@@ -133,8 +137,7 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
     }
 
     setState(() {
-      receiptItemWidgets.clear();
-      receiptItemWidgets = getReceiptItemWidgets();
+      receiptItemWidgets[itemId] = getReceiptItemWidget(ri);
     });
   }
 
@@ -149,8 +152,7 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
     }
 
     setState(() {
-      receiptItemWidgets.clear();
-      receiptItemWidgets = getReceiptItemWidgets();
+      receiptItemWidgets.remove(itemId);
     });
   }
 
@@ -186,7 +188,7 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
                 ),
               ],
             ),
-            Column(children: receiptItemWidgets),
+            Column(children: receiptItemWidgets.values.toList()),
           ],
         ),
       ),
