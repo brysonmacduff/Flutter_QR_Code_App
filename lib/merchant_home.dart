@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:ceg4912_project/item_page.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Support/utility.dart';
+import 'package:ceg4912_project/merchant_receipt_page.dart';
 import 'package:flutter/material.dart';
 import 'Models/user.dart';
 
@@ -26,7 +27,17 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
     );
   }
 
-  void loadReceiptPage() {}
+  void loadReceiptPage() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const MerchantReceiptPage(),
+      ),
+    );
+
+    // clear the static receipt item list upon returning from the receipt page
+    MerchantReceiptPage.receiptItems.clear();
+  }
 
   void loadReceiptHistoryPage() {}
 
