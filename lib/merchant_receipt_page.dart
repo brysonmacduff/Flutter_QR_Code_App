@@ -1,3 +1,6 @@
+import 'package:ceg4912_project/Support/session.dart';
+import 'package:ceg4912_project/merchant_home.dart';
+import 'package:ceg4912_project/merchant_receipt_qr_page.dart';
 import 'package:flutter/material.dart';
 import 'package:ceg4912_project/Support/utility.dart';
 import 'package:ceg4912_project/Models/receipt_item.dart';
@@ -43,7 +46,32 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
   void scanLabel() {}
 
   // Convert receipt data to JSON and generate a QR code. Pushes a new page that has a big receipt QR code.
-  void finishReceipt() {}
+  void finishReceipt() {
+    String qrData = "{'merchantId':'" +
+        Session.getSessionUser().getId().toString() +
+        "','items':";
+
+    for (int i = 0; i < MerchantReceiptPage.receiptItems.length; i++) {
+      ReceiptItem ri = MerchantReceiptPage.receiptItems[i];
+      if (i == MerchantReceiptPage.receiptItems.length - 1) {
+        qrData += ri.toJSON();
+      } else {
+        qrData += ri.toJSON() + ",";
+      }
+    }
+    qrData += "}";
+    print(qrData);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const MerchantReceiptQRPage(),
+        settings: RouteSettings(
+          arguments: {"qrData": qrData},
+        ),
+      ),
+    );
+  }
 
   // gets a complete list of UI widgets for each of the receipt items
   Map<int, Widget> getReceiptItemWidgets() {

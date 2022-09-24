@@ -29,4 +29,22 @@ class ReceiptItem {
     _quanity--;
     return true;
   }
+
+  // Converts this object to a JSON string. Only converts information the customer view would need.
+  String toJSON() {
+    String json = "{" +
+        "'itemId':'" +
+        _item.getItemId().toString() +
+        "','quantity':'" +
+        _quanity.toString() +
+        "','name':'" +
+        _item.getName() +
+        "','price':'" +
+        _item.getPrice().toString() +
+        "'}";
+    return json;
+  }
+
+  // converts from JSON to an item object
+  //static Item toItem(String json) {}
 }
