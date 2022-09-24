@@ -102,4 +102,17 @@ class Item {
       return "No";
     }
   }
+
+  // converts customer-relevant data to JSON
+  String toJSON() {
+    String json = "{" +
+        "'itemId':'" +
+        _id.toString() +
+        "','name':'" +
+        _name +
+        "','price':'" +
+        _price.toString() +
+        "'}";
+    return json;
+  }
 }
