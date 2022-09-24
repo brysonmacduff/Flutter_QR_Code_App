@@ -19,12 +19,15 @@ class MerchantReceiptPage extends StatefulWidget {
 
 class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
   Map<int, Widget> receiptItemWidgets = Map<int, Widget>();
+  double receiptPriceSum = 0;
 
   // reset the current receipt item list and clear the UI
   void clearReceiptItems() {
     MerchantReceiptPage.receiptItems.clear();
+
     setState(() {
       receiptItemWidgets.clear();
+      receiptPriceSum = 0;
     });
   }
 
@@ -39,14 +42,30 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
 
     // when the ReceiptItemPage is popped, this code will be reached due to the "await" before Navigator.Push
     setState(() {
+      // generate the receipt item widgets in the UI
       receiptItemWidgets = getReceiptItemWidgets();
+      updateReceiptPriceSum();
     });
   }
 
   void scanLabel() {}
 
+  // updates the receipt cost total in the UI
+  void updateReceiptPriceSum() {
+    // recaluclate the receipt price total
+    receiptPriceSum = 0;
+    for (int i = 0; i < MerchantReceiptPage.receiptItems.length; i++) {
+      ReceiptItem ri = MerchantReceiptPage.receiptItems[i];
+      receiptPriceSum += ri.getQuanity() * ri.getItem().getPrice();
+    }
+  }
+
   // Convert receipt data to JSON and generate a QR code. Pushes a new page that has a big receipt QR code.
   void finishReceipt() {
+    if (MerchantReceiptPage.receiptItems.isEmpty) {
+      return;
+    }
+
     String qrData = "{'merchantId':'" +
         Session.getSessionUser().getId().toString() +
         "','items':";
@@ -149,6 +168,7 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
 
     setState(() {
       receiptItemWidgets[itemId] = getReceiptItemWidget(ri);
+      updateReceiptPriceSum();
     });
   }
 
@@ -166,6 +186,7 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
 
     setState(() {
       receiptItemWidgets[itemId] = getReceiptItemWidget(ri);
+      updateReceiptPriceSum();
     });
   }
 
@@ -181,6 +202,7 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
 
     setState(() {
       receiptItemWidgets.remove(itemId);
+      updateReceiptPriceSum();
     });
   }
 
@@ -197,24 +219,74 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
         alignment: Alignment.topCenter,
         child: ListView(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // button for scanning product labels and adding them to the receipt
-                TextButton(
-                  onPressed: scanLabel,
-                  child: const Text("Scan"),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                color: Utility.getBackGroundColor(),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // button for scanning product labels and adding them to the receipt
+                        Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Container(
+                            color: Colors.blue,
+                            child: TextButton(
+                              onPressed: scanLabel,
+                              child: const Text(
+                                "Scan",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                        // finalizes the receipt and generates a QR code
+                        Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Container(
+                            color: Colors.blue,
+                            child: TextButton(
+                              onPressed: finishReceipt,
+                              child: const Text(
+                                "Done",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Container(
+                            color: Colors.blue,
+                            child: TextButton(
+                              onPressed: clearReceiptItems,
+                              child: const Text(
+                                "Reset",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          "Total: \$" + receiptPriceSum.toStringAsFixed(2),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 20),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                // finalizes the receipt and generates a QR code
-                TextButton(
-                  onPressed: finishReceipt,
-                  child: const Text("Submit"),
-                ),
-                TextButton(
-                  onPressed: clearReceiptItems,
-                  child: const Text("Clear"),
-                ),
-              ],
+              ),
             ),
             Column(children: receiptItemWidgets.values.toList()),
           ],
