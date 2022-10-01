@@ -1,10 +1,10 @@
 import 'package:ceg4912_project/Support/session.dart';
-import 'package:ceg4912_project/merchant_home.dart';
 import 'package:ceg4912_project/merchant_receipt_qr_page.dart';
 import 'package:flutter/material.dart';
 import 'package:ceg4912_project/Support/utility.dart';
 import 'package:ceg4912_project/Models/receipt_item.dart';
-import 'package:ceg4912_project/Models/item.dart';
+
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:ceg4912_project/merchant_receipt_item_page.dart';
 
 class MerchantReceiptPage extends StatefulWidget {
@@ -48,7 +48,22 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
     });
   }
 
-  void scanLabel() {}
+  // Opens a scan view that reads data from a 1D bar code label.
+  Future<void> scanLabel() async {
+    String result = await FlutterBarcodeScanner.scanBarcode(
+        '#ff6666', 'Cancel', true, ScanMode.BARCODE);
+    print("label data: " + result);
+
+    // If the merchant cancels the scan then the result returns -1.
+    if (result == "-1") {
+      return;
+    } else {
+      // After the scan, the scan view opens itself again so the merchant can scan the next item.
+      scanLabel();
+    }
+
+    // WIP - Extract label JSON data and add the associated merchant item to the receipt.
+  }
 
   // updates the receipt cost total in the UI
   void updateReceiptPriceSum() {
