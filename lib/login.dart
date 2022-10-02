@@ -16,7 +16,7 @@ import 'package:ceg4912_project/Support/session.dart';
 // model files
 import 'package:ceg4912_project/Models/user.dart';
 
-import 'item_page.dart';
+//import 'item_page.dart';
 
 class LogInPageRoute extends StatelessWidget {
   const LogInPageRoute({Key? key}) : super(key: key);
@@ -84,16 +84,6 @@ class _LogInPageState extends State<LogInPage> {
       context,
       MaterialPageRoute(
         builder: (_) => const MerchantHomePage(),
-      ),
-    );
-  }
-
-  // redirect to the item page
-  void itemPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const ItemPage(),
       ),
     );
   }
