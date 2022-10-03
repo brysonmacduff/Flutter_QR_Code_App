@@ -3,7 +3,6 @@ import 'package:ceg4912_project/merchant_receipt_qr_page.dart';
 import 'package:flutter/material.dart';
 import 'package:ceg4912_project/Support/utility.dart';
 import 'package:ceg4912_project/Models/receipt_item.dart';
-
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:ceg4912_project/merchant_receipt_item_page.dart';
 
@@ -62,7 +61,10 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
       scanLabel();
     }
 
-    // WIP - Extract label JSON data and add the associated merchant item to the receipt.
+    // WIP - Extract the label's JSON data and add the associated merchant item to the receipt.
+    // - Identify the merchant item that the label data points to
+    // - If its in the receipt item list then increment the quanity
+    // - If its not in the receipt item list then append it
   }
 
   // updates the receipt cost total in the UI

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 //import 'package:mysql1/mysql1.dart';
 
 // other project pages
-import 'package:ceg4912_project/homepage.dart';
 import 'package:ceg4912_project/signup.dart';
 
 // support files
@@ -112,17 +111,6 @@ class _LogInPageState extends State<LogInPage> {
             TextButton(
               onPressed: loadSignUpPage,
               child: const Text("Sign Up"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const HomePage(),
-                  ),
-                );
-              },
-              child: const Text("Home Page (Dev Mode)"),
             ),
           ],
         ),

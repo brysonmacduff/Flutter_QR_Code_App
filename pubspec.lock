@@ -8,6 +8,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.9.0"
+  barcode:
+    dependency: "direct main"
+    description:
+      name: barcode
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.2.3"
+  barcode_widget:
+    dependency: "direct main"
+    description:
+      name: barcode_widget
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.3"
   boolean_selector:
     dependency: transitive
     description:
@@ -176,7 +190,7 @@ packages:
       name: qr
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.0"
+    version: "3.0.1"
   qr_code_scanner:
     dependency: "direct main"
     description:
@@ -184,13 +198,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.1"
-  qr_flutter:
-    dependency: "direct main"
-    description:
-      name: qr_flutter
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "4.0.0"
   sky_engine:
     dependency: transitive
     description: flutter

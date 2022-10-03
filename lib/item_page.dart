@@ -1,4 +1,5 @@
 import 'package:ceg4912_project/edit_item_page.dart';
+import 'package:ceg4912_project/merchant_label_print_page.dart';
 import 'package:ceg4912_project/new_item_page.dart';
 import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/Support/session.dart';
@@ -138,6 +139,19 @@ class _ItemPageState extends State<ItemPage> {
     ).then((value) => getItems());
   }
 
+  // Navigates to a new page to find a printer and print a barcode label for it
+  void printItemLabel(int itemIndex) {
+    Item selectedItem = items[itemIndex];
+    Map arguments = {"item": selectedItem};
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: ((context) => const MerchantLabelPrintPage()),
+        settings: RouteSettings(arguments: arguments),
+      ),
+    );
+  }
+
   // clears the event message after some time has passed
   void clearEventMessage(int delay) {
     Future.delayed(Duration(milliseconds: delay), () {
@@ -182,6 +196,10 @@ class _ItemPageState extends State<ItemPage> {
                     Icons.edit,
                     color: Colors.blue,
                   ),
+                ),
+                IconButton(
+                  onPressed: () => {printItemLabel(i)},
+                  icon: const Icon(Icons.print, color: Colors.blue),
                 ),
                 if (!isDeleting)
                   IconButton(
