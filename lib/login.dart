@@ -2,6 +2,7 @@
 //import 'dart:html';
 
 import 'package:ceg4912_project/merchant_home.dart';
+import 'package:ceg4912_project/customer_home.dart';
 import 'package:flutter/material.dart';
 //import 'package:mysql1/mysql1.dart';
 
@@ -60,6 +61,7 @@ class _LogInPageState extends State<LogInPage> {
     if (user.getRole() == Roles.customer) {
       // go to customer home page
       print("login as customer");
+      loadCustomerHomePage();
     } else if (user.getRole() == Roles.merchant) {
       // go to merchant home page
       print("login as merchant");
@@ -83,6 +85,15 @@ class _LogInPageState extends State<LogInPage> {
       context,
       MaterialPageRoute(
         builder: (_) => const MerchantHomePage(),
+      ),
+    );
+  }
+
+  void loadCustomerHomePage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const CustomerHomePage(),
       ),
     );
   }
