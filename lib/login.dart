@@ -1,11 +1,12 @@
 // dependencies
 //import 'dart:html';
 
+import 'package:ceg4912_project/merchant_home.dart';
+import 'package:ceg4912_project/customer_home.dart';
 import 'package:flutter/material.dart';
-import 'package:mysql1/mysql1.dart';
+//import 'package:mysql1/mysql1.dart';
 
 // other project pages
-import 'package:ceg4912_project/homepage.dart';
 import 'package:ceg4912_project/signup.dart';
 
 // support files
@@ -14,6 +15,8 @@ import 'package:ceg4912_project/Support/session.dart';
 
 // model files
 import 'package:ceg4912_project/Models/user.dart';
+
+//import 'item_page.dart';
 
 class LogInPageRoute extends StatelessWidget {
   const LogInPageRoute({Key? key}) : super(key: key);
@@ -56,20 +59,41 @@ class _LogInPageState extends State<LogInPage> {
     Session.setSessionUser(user);
 
     if (user.getRole() == Roles.customer) {
-      print("login as customer");
       // go to customer home page
+      print("login as customer");
+      loadCustomerHomePage();
     } else if (user.getRole() == Roles.merchant) {
-      print("login as merchant");
       // go to merchant home page
+      print("login as merchant");
+      loadMerchantHomePage();
     }
   }
 
   // redirect to the sign up page
-  void signUp() {
+  void loadSignUpPage() {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => const SignUpPage(),
+      ),
+    );
+  }
+
+  // appends the merchant home page to the page stack
+  void loadMerchantHomePage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const MerchantHomePage(),
+      ),
+    );
+  }
+
+  void loadCustomerHomePage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const CustomerHomePage(),
       ),
     );
   }
@@ -96,19 +120,8 @@ class _LogInPageState extends State<LogInPage> {
               child: const Text("Sign In"),
             ),
             TextButton(
-              onPressed: signUp,
+              onPressed: loadSignUpPage,
               child: const Text("Sign Up"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const HomePage(),
-                  ),
-                );
-              },
-              child: const Text("Home Page (Dev Mode)"),
             ),
           ],
         ),

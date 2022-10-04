@@ -1,5 +1,10 @@
+import 'package:ceg4912_project/Models/customer.dart';
+import 'package:ceg4912_project/Models/item.dart';
+import 'package:ceg4912_project/Models/merchant.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:ceg4912_project/Models/user.dart';
+import 'package:ceg4912_project/Models/receipt.dart';
 
 // a public class of sql queries
 class Queries {
@@ -32,13 +37,11 @@ class Queries {
       String uPassword = results.first["uPassword"];
       String uRole = results.first["uRole"];
 
-      Roles role = Roles.merchant;
       if (uRole == "C") {
-        role = Roles.customer;
+        return Customer.credentials(uId, uEmail, uPassword);
+      } else {
+        return Merchant.credentials(uId, uEmail, uPassword);
       }
-
-      User user = User.user(uId, uEmail, uPassword, role);
-      return user;
     } catch (e) {
       return null;
     }
@@ -193,6 +196,176 @@ class Queries {
     } catch (e) {
       print(e);
       return false;
+    }
+  }
+
+  // gets the business items that pertain to a merchant identified by mId
+  static getMerchantItems(MySqlConnection conn, int mId) async {
+    String query = "select * from item where mId = '" + mId.toString() + "'";
+
+    // result rows are in JSON format
+    try {
+      List<Item> items = <Item>[];
+      var results = await conn.query(query);
+      var iterator = results.iterator;
+
+      while (iterator.moveNext()) {
+        var result = iterator.current;
+
+        int iId = result["iId"];
+        int mId = result["mId"];
+        String iName = result["iName"];
+        String iCode = result["iCode"];
+        String iDetails = result["iDetails"].toString();
+        String iCategory = result["iCategory"];
+        double iPrice = result["iPrice"];
+        int iTaxable = result["iTaxable"];
+
+        bool taxable = false;
+        // mysql stores booleans as integers but only lets them be 1 or 0.
+        if (iTaxable == 1) {
+          taxable = true;
+        }
+
+        Categories category = Categories.none;
+
+        // this looks redundant now but will be extended as more categories are included
+        if (iCategory == "none") {
+          category = Categories.none;
+        }
+
+        items.add(Item.all(
+            iId, mId, iName, iCode, iDetails, category, iPrice, taxable));
+      }
+
+      return items;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  // gets the largest primary key id of the item table
+  static _getMaxItemId(MySqlConnection conn) async {
+    String query = "select max(iId) as maxId from item";
+    return await conn.query(query);
+  }
+
+  // inserts a new item into the database
+  static insertItem(
+      MySqlConnection conn,
+      int merchantId,
+      String name,
+      String details,
+      String code,
+      Categories category,
+      String price,
+      bool taxable) async {
+    try {
+      var result = await _getMaxItemId(conn);
+      int maxId = result.first["maxId"];
+      String nextId = (maxId + 1).toString();
+
+      int nTaxable = 1;
+      if (!taxable) {
+        nTaxable = 0;
+      }
+
+      String query = "insert into item values ('" +
+          nextId +
+          "','" +
+          merchantId.toString() +
+          "','" +
+          name +
+          "','" +
+          code +
+          "','" +
+          details +
+          "','" +
+          Item.getFormattedCategoryByParameter(category) +
+          "','" +
+          price +
+          "','" +
+          nTaxable.toString() +
+          "')";
+
+      await conn.query(query);
+      return true;
+    } catch (e) {
+      print("insertItem(): " + e.toString());
+      return false;
+    }
+  }
+
+  // edits an item in the database
+  static editItem(MySqlConnection conn, Item item) async {
+    try {
+      int nTaxable = 1;
+      if (!item.isTaxable()) {
+        nTaxable = 0;
+      }
+
+      String query = "update item set iName='" +
+          item.getName() +
+          "', iCode='" +
+          item.getCode() +
+          "', iDetails='" +
+          item.getDetails() +
+          "', iCategory='" +
+          item.getCategoryFormatted() +
+          "', iPrice=" +
+          item.getPrice().toString() +
+          ", iTaxable=" +
+          nTaxable.toString() +
+          " where iId=" +
+          item.getItemId().toString();
+
+      await conn.query(query);
+      return true;
+    } catch (e) {
+      print("editItem(): " + e.toString());
+      return false;
+    }
+  }
+
+  // deletes an item by specifying its primary key id
+  static deleteItem(MySqlConnection conn, int itemId) async {
+    try {
+      String query = "delete from item where iId = " + itemId.toString() + "";
+      await conn.query(query);
+
+      return true;
+    } catch (e) {
+      print("delteItem(): " + e.toString());
+      return false;
+    }
+  }
+
+  static getMerchantReceipts(MySqlConnection conn, int mId) async {
+    String query = "select * from receipt where mid = '" + mId.toString() + "'";
+
+    // result rows are in JSON format
+    try {
+      List<Receipt> receipts = <Receipt>[];
+      var results = await conn.query(query);
+      var iterator = results.iterator;
+
+      while (iterator.moveNext()) {
+        var result = iterator.current;
+
+        int rId = result["rid"];
+        DateTime dateTime = result["rDateTime"];
+        double cost = double.parse(result["rCost"]);
+        int mId = result["mid"];
+        int cId = result["cid"];
+
+        receipts.add(Receipt.all(rId, dateTime, cost, mId, cId));
+      }
+
+      return receipts;
+    } catch (e) {
+      print(e);
+      return null;
     }
   }
 }
