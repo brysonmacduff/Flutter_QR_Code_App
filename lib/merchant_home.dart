@@ -1,5 +1,5 @@
 import 'dart:ffi';
-
+import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/item_page.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Support/utility.dart';
@@ -28,10 +28,23 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
   }
 
   void loadReceiptPage() async {
+    int mId = Session.getSessionUser().getId();
+    var conn = await Queries.getConnection();
+    var mItems = await Queries.getMerchantItems(conn, mId);
+
+    // exit if something went wrong
+    if (mItems == null) {
+      return;
+    }
+
+    // send the merchant's business items to the receipt page
     await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => const MerchantReceiptPage(),
+        settings: RouteSettings(
+          arguments: {"merchantItems": mItems},
+        ),
       ),
     );
 

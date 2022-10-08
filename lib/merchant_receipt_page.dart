@@ -5,6 +5,8 @@ import 'package:ceg4912_project/Support/utility.dart';
 import 'package:ceg4912_project/Models/receipt_item.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:ceg4912_project/merchant_receipt_item_page.dart';
+import 'package:ceg4912_project/Models/item.dart';
+import 'dart:convert';
 
 class MerchantReceiptPage extends StatefulWidget {
   const MerchantReceiptPage({Key? key}) : super(key: key);
@@ -17,6 +19,10 @@ class MerchantReceiptPage extends StatefulWidget {
 }
 
 class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
+  // Stores all of the items that belong to this merchant. This is used for rapidly adding items to a receipt during label scanning.
+  // This list is populated on loading of this page. Data is passed from the merchant home page.
+  List<Item> merchantItems = List.empty();
+
   Map<int, Widget> receiptItemWidgets = Map<int, Widget>();
   double receiptPriceSum = 0;
 
@@ -49,22 +55,61 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
 
   // Opens a scan view that reads data from a 1D bar code label.
   Future<void> scanLabel() async {
+    // starts the barcode scan and returns the barcode data
     String result = await FlutterBarcodeScanner.scanBarcode(
         '#ff6666', 'Cancel', true, ScanMode.BARCODE);
     print("label data: " + result);
 
     // If the merchant cancels the scan then the result returns -1.
     if (result == "-1") {
+      // update the receipt page to represent the current state of the in-progress receipt
+      setState(() {
+        // generate the receipt item widgets in the UI
+        receiptItemWidgets = getReceiptItemWidgets();
+        updateReceiptPriceSum();
+      });
+
+      // exit if label scanning is complete
       return;
-    } else {
-      // After the scan, the scan view opens itself again so the merchant can scan the next item.
-      scanLabel();
     }
 
-    // WIP - Extract the label's JSON data and add the associated merchant item to the receipt.
-    // - Identify the merchant item that the label data points to
-    // - If its in the receipt item list then increment the quanity
-    // - If its not in the receipt item list then append it
+    // Add the scanned item to the receipt --------------------------------------------------------------------------------
+
+    // This item map will only contain the item id. We only care about the id right now.
+    Map itemMap = jsonDecode(result);
+    int iId = int.parse(itemMap["iId"]);
+
+    bool inReceipt = false;
+
+    // Look to see if the item is already on the receipt. If there, increment the item quanity.
+    for (int i = 0; i < MerchantReceiptPage.receiptItems.length; i++) {
+      ReceiptItem ri = MerchantReceiptPage.receiptItems[i];
+      if (ri.getItem().getItemId() == iId) {
+        ri.incrementQuantity();
+        MerchantReceiptPage.receiptItems[i] = ri;
+        inReceipt = true;
+        break;
+      }
+    }
+
+    // if the item was not found in the receipt, then add it
+    if (inReceipt == false) {
+      // find the item in the merchant items list that was scanned
+      for (int i = 0; i < merchantItems.length; i++) {
+        Item item = merchantItems[i];
+        if (iId == item.getItemId()) {
+          // add the scanned item to the receipt
+          ReceiptItem ri = ReceiptItem.create(item);
+          MerchantReceiptPage.receiptItems.add(ri);
+          break;
+        }
+      }
+    }
+
+    // if the label data is invalid then this function will not alter the receipt and will harmless return to the scan view
+
+    // After the scan, the scan view opens itself again so the merchant can scan the next item.
+    scanLabel();
   }
 
   // updates the receipt cost total in the UI
@@ -83,9 +128,9 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
       return;
     }
 
-    String qrData = "{'merchantId':'" +
+    String qrData = "{\"merchantId\":\"" +
         Session.getSessionUser().getId().toString() +
-        "','items':";
+        "\",\"items\":";
 
     for (int i = 0; i < MerchantReceiptPage.receiptItems.length; i++) {
       ReceiptItem ri = MerchantReceiptPage.receiptItems[i];
@@ -225,6 +270,10 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
 
   @override
   Widget build(BuildContext context) {
+    // get the merchant items that belong to this merchant
+    merchantItems =
+        (ModalRoute.of(context)!.settings.arguments! as Map)["merchantItems"];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Receipt Page"),
