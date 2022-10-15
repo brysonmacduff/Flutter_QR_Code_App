@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:ceg4912_project/Models/customer.dart';
 import 'package:ceg4912_project/Models/item.dart';
 import 'package:ceg4912_project/Models/merchant.dart';
@@ -5,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:ceg4912_project/Models/user.dart';
 import 'package:ceg4912_project/Models/receipt.dart';
+import 'package:ceg4912_project/Models/receipt_item.dart';
 
 // a public class of sql queries
 class Queries {
@@ -341,25 +344,41 @@ class Queries {
     }
   }
 
-  static getMerchantReceipts(MySqlConnection conn, int mId) async {
-    String query = "select * from receipt where mid = '" + mId.toString() + "'";
-
+  static getMerchantReceipts(MySqlConnection conn, int mId, int cId) async {
+    String query = "select * from receipt AS r JOIN receiptitem AS ri ON r.rid = ri.rid JOIN item as i ON ri.iId = i.iId where r.mId = '" + mId.toString() + "' and r.cid = '" + cId.toString() +"'";
     // result rows are in JSON format
     try {
       List<Receipt> receipts = <Receipt>[];
+      List<ReceiptItem> receiptItems = <ReceiptItem>[];
+      List<Item> items = <Item>[];
+
       var results = await conn.query(query);
       var iterator = results.iterator;
 
       while (iterator.moveNext()) {
         var result = iterator.current;
 
+        int itemId = result["iId"];
+        int mId = result["mid"];
+        String itemName = result["iName"];
+        String itemCode = result["iCode"];
+        String itemDetails = result["iDetails"];
+        Categories itemCategory = result["iCategory"];
+        double itemPrice = result["iPrice"];
+        bool itemTaxable = result["iTaxable"];
+
+        items.add(Item.all(itemId, mId, itemName, itemCode, itemDetails, itemCategory, itemPrice, itemTaxable));
+
+        for (Item i in items) {
+          receiptItems.add(ReceiptItem.create(i));
+        }
+
         int rId = result["rid"];
         DateTime dateTime = result["rDateTime"];
         double cost = double.parse(result["rCost"]);
-        int mId = result["mid"];
         int cId = result["cid"];
 
-        receipts.add(Receipt.all(rId, dateTime, cost, mId, cId));
+        receipts.add(Receipt.all(rId, dateTime, cost, mId, cId, receiptItems));
       }
 
       return receipts;
