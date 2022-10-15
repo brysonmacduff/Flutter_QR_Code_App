@@ -109,7 +109,6 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
   @override
   void initState() {
     super.initState();
-    _getCustomerList();
     _getReceipts();
   }
 
@@ -120,25 +119,6 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
         builder: (_) => const MerchantFilter(),
       ),
     );
-  }
-
-  void _getCustomerList() async {
-    int mId = Session.getSessionUser().getId();
-
-    var conn = await Queries.getConnection();
-    var mCustomers = await Queries.getCustomerEmails(conn, mId);
-    // if the query went wrong then it would return null
-    if (mCustomers == null) {
-      setState(() {
-        eventMessage = "Receipt Retrieval Failed.";
-        eventMessageColor = Colors.red;
-      });
-
-      // clears the event message after 2 seconds have passed
-      clearEventMessage(2000);
-      return;
-    }
-
   }
 
   // generates widgets for all of the current merchant's business receipt
