@@ -345,7 +345,12 @@ class Queries {
   }
 
   static getMerchantReceipts(MySqlConnection conn, int mId, int cId) async {
-    String query = "select * from receipt AS r JOIN receiptitem AS ri ON r.rid = ri.rid JOIN item as i ON ri.iId = i.iId where r.mId = '" + mId.toString() + "' and r.cid = '" + cId.toString() +"'";
+    String query =
+        "select * from receipt AS r JOIN receiptitem AS ri ON r.rid = ri.rid JOIN item as i ON ri.iId = i.iId where r.mId = '" +
+            mId.toString() +
+            "' and r.cid = '" +
+            cId.toString() +
+            "'";
     // result rows are in JSON format
     try {
       List<Receipt> receipts = <Receipt>[];
@@ -382,6 +387,29 @@ class Queries {
       }
 
       return receipts;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  // returns all customers that have a receipt at a given merchant
+  static getCustomerEmails(MySqlConnection conn, int mid) async {
+    String query =
+        "select cEmail from customer AS c JOIN receipt As r ON c.cid = r.cid JOIN merchant as m ON m.mid = r.mid where m.mId = '" +
+            mid.toString() +
+            "'";
+    try {
+      List<String> emails = <String>[];
+
+      var results = await conn.query(query);
+      var iterator = results.iterator;
+      while (iterator.moveNext()) {
+        var result = iterator.current;
+        String email = result["cEmail"];
+        emails.add(email);
+      }
+      return emails;
     } catch (e) {
       print(e);
       return null;
