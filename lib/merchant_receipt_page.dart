@@ -1,3 +1,4 @@
+import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/merchant_receipt_qr_page.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,10 @@ import 'package:ceg4912_project/Models/receipt_item.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:ceg4912_project/merchant_receipt_item_page.dart';
 import 'package:ceg4912_project/Models/item.dart';
+import 'package:ceg4912_project/Models/receipt.dart';
 import 'dart:convert';
+
+import 'package:mysql1/mysql1.dart';
 
 class MerchantReceiptPage extends StatefulWidget {
   const MerchantReceiptPage({Key? key}) : super(key: key);
@@ -123,15 +127,14 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
   }
 
   // Convert receipt data to JSON and generate a QR code. Pushes a new page that has a big receipt QR code.
-  void finishReceipt() {
+  void finishReceipt() async {
     if (MerchantReceiptPage.receiptItems.isEmpty) {
       return;
     }
-
+    /*
     String qrData = "{\"merchantId\":\"" +
         Session.getSessionUser().getId().toString() +
         "\",\"items\":";
-
     for (int i = 0; i < MerchantReceiptPage.receiptItems.length; i++) {
       ReceiptItem ri = MerchantReceiptPage.receiptItems[i];
       if (i == MerchantReceiptPage.receiptItems.length - 1) {
@@ -141,8 +144,47 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
       }
     }
     qrData += "}";
-    print(qrData);
+    print(qrData);*/
+    MySqlConnection conn;
 
+    // get the next available receipt id from the database
+    int receiptId = -1;
+    try {
+      conn = await Queries.getConnection();
+      var result = await Queries.getMaxReceiptId(conn);
+      receiptId = result.first["maxId"] + 1;
+    } catch (e) {
+      print("Receipt ID SQL query failed.");
+      return;
+    }
+
+    // create receipt object
+    Receipt receipt = Receipt.all(
+        receiptId,
+        DateTime.now(),
+        receiptPriceSum,
+        Session.getSessionUser().getId(),
+        -1, // NOTE: the customer id argument is set to -1 since this information will be set by the customer when they scan the receipt
+        MerchantReceiptPage.receiptItems);
+
+    // Write the receipt to the database. Upon success, display the QR code that contains the receipt id to the customer to scan.
+    var insertionResult = false;
+    try {
+      conn = await Queries.getConnection();
+      insertionResult = await Queries.insertReceipt(conn, receipt);
+    } catch (e) {
+      print("Failed to insert receipt to the database.");
+      return;
+    }
+
+    if (insertionResult == false) {
+      return;
+    }
+
+    // this is the JSON data that will appear in the QR code receipt that is presented to the customer
+    String qrData = "{\"receiptId\":'" + receiptId.toString() + "'}";
+
+    // push the page that contains the qrData
     Navigator.push(
       context,
       MaterialPageRoute(
