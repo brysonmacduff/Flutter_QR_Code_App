@@ -1,12 +1,15 @@
+import 'dart:convert';
 import 'dart:ffi';
 
+import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/item_page.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Support/utility.dart';
 //import 'package:ceg4912_project/merchant_receipt_page.dart';
 import 'package:flutter/material.dart';
-import 'package:ceg4912_project/Models/user
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';.dart';
+import 'package:ceg4912_project/Models/user.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:mysql1/mysql1.dart';
 
 class CustomerHomePage extends StatefulWidget {
   const CustomerHomePage({Key? key}) : super(key: key);
@@ -47,6 +50,19 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     String result = await FlutterBarcodeScanner.scanBarcode(
         '#ff6666', 'Cancel', true, ScanMode.QR);
     print("label data: " + result);
+    
+    Map extractID = jsonDecode(result);
+    print(extractID["receiptId"]);
+    int receiptId = int.parse(extractID["receiptId"]);
+
+    int userId = Session.getSessionUser().getId();
+    try{
+      MySqlConnection connection = await Queries.getConnection();
+      bool success = Queries.editReceiptCid(connection, receiptId, userId);
+      print("############################################################## RECEIPT SUCCESS? " + success.toString());
+    }catch(e){
+      print("############################## EXCEPTION ######################################");
+    }
 
   }
 

@@ -329,6 +329,21 @@ class Queries {
     }
   }
 
+  static editReceiptCid(MySqlConnection conn, int rId, int cId) async {
+    try {
+      String query = "update receipt set cid='" +
+          cId.toString() + "'"
+          " where rId='" +
+          rId.toString() + "';";
+
+      await conn.query(query);
+      return true;
+    } catch (e) {
+      print("editReceiptCid(): " + e.toString());
+      return false;
+    }
+  }
+
   // deletes an item by specifying its primary key id
   static deleteItem(MySqlConnection conn, int itemId) async {
     try {
@@ -337,7 +352,7 @@ class Queries {
 
       return true;
     } catch (e) {
-      print("delteItem(): " + e.toString());
+      print("deleteItem(): " + e.toString());
       return false;
     }
   }

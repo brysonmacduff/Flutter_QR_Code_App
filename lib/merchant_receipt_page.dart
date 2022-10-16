@@ -182,7 +182,7 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
     }
 
     // this is the JSON data that will appear in the QR code receipt that is presented to the customer
-    String qrData = "{\"receiptId\":'" + receiptId.toString() + "'}";
+    String qrData = "{\"receiptId\":\"" + receiptId.toString() + "\"}";
 
     // push the page that contains the qrData
     Navigator.push(
