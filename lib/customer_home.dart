@@ -58,12 +58,14 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     int userId = Session.getSessionUser().getId();
     try{
       MySqlConnection connection = await Queries.getConnection();
-      bool success = Queries.editReceiptCid(connection, receiptId, userId);
-      print("############################################################## RECEIPT SUCCESS? " + success.toString());
+      bool success = false;
+      Queries.editReceiptCid(connection, receiptId, userId);
+      success = true;
+      print("####################################################### RECEIPT SUCCESS? " + success.toString());
     }catch(e){
       print("############################## EXCEPTION ######################################");
     }
-
+    showAlertDialog(context);
   }
 
   void loadCustomerAccountPage() {}
@@ -81,6 +83,32 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     Session.clearSessionUser();
     Navigator.pop(context);
     Navigator.pop(context);
+  }
+
+  showAlertDialog(BuildContext context) {
+
+    // set up the button
+    Widget okButton = TextButton(
+      child: const Text("OK"),
+      onPressed: () {Navigator.pop(context); },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: const Text("Scan Success"),
+      content: const Text("Receipt Added"),
+      actions: [
+        okButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   @override
