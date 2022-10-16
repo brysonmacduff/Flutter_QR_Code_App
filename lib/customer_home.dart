@@ -5,7 +5,8 @@ import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Support/utility.dart';
 //import 'package:ceg4912_project/merchant_receipt_page.dart';
 import 'package:flutter/material.dart';
-import 'package:ceg4912_project/Models/user.dart';
+import 'package:ceg4912_project/Models/user
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';.dart';
 
 class CustomerHomePage extends StatefulWidget {
   const CustomerHomePage({Key? key}) : super(key: key);
@@ -41,7 +42,13 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   }
 **/
 
-  void loadScanReceiptPage() {}
+  Future<void> loadScanReceiptPage() async {
+
+    String result = await FlutterBarcodeScanner.scanBarcode(
+        '#ff6666', 'Cancel', true, ScanMode.QR);
+    print("label data: " + result);
+
+  }
 
   void loadCustomerAccountPage() {}
 
