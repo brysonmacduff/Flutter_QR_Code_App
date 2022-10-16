@@ -131,20 +131,7 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
     if (MerchantReceiptPage.receiptItems.isEmpty) {
       return;
     }
-    /*
-    String qrData = "{\"merchantId\":\"" +
-        Session.getSessionUser().getId().toString() +
-        "\",\"items\":";
-    for (int i = 0; i < MerchantReceiptPage.receiptItems.length; i++) {
-      ReceiptItem ri = MerchantReceiptPage.receiptItems[i];
-      if (i == MerchantReceiptPage.receiptItems.length - 1) {
-        qrData += ri.toJSON();
-      } else {
-        qrData += ri.toJSON() + ",";
-      }
-    }
-    qrData += "}";
-    print(qrData);*/
+
     MySqlConnection conn;
 
     // get the next available receipt id from the database
@@ -182,7 +169,7 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
     }
 
     // this is the JSON data that will appear in the QR code receipt that is presented to the customer
-    String qrData = "{\"receiptId\":'" + receiptId.toString() + "'}";
+    String qrData = "{\"receiptId\":\"" + receiptId.toString() + "\"}";
 
     // push the page that contains the qrData
     Navigator.push(
