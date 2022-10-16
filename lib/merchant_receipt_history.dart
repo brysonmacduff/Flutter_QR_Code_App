@@ -1,6 +1,7 @@
 import 'package:ceg4912_project/Models/receipt.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Support/queries.dart';
+import 'package:ceg4912_project/merchant_filter.dart';
 import 'package:flutter/material.dart';
 
 var merchantName = "Amazon";
@@ -96,6 +97,8 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
   List<Widget> receiptWidgets = <Widget>[];
   // keeps track of which receipt widgets are expanded in the UI
   List<bool> receiptExpandedStateSet = <bool>[];
+  //Stores all customers
+  List<String> customerEmails = <String>[];
 
   // the color of event messages that are displayed to the user
   Color eventMessageColor = Colors.white;
@@ -109,11 +112,22 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
     _getReceipts();
   }
 
+  void loadMerchantFilterPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const MerchantFilter(),
+      ),
+    );
+  }
+
   // generates widgets for all of the current merchant's business receipt
   void _getReceipts() async {
     int mId = Session.getSessionUser().getId();
+    // hardcoded cid for now
+    int cId = 1;
     var conn = await Queries.getConnection();
-    var mReceipts = await Queries.getMerchantReceipts(conn, mId);
+    var mReceipts = await Queries.getMerchantReceipts(conn, mId, cId);
 
     // if the query went wrong then it would return null
     if (mReceipts == null) {
@@ -313,7 +327,7 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
             // Open the drop down
             ElevatedButton(
               child: const Text('Filter'),
-              onPressed: _showFilter,
+              onPressed: loadMerchantFilterPage,
             ),
             ElevatedButton(
               child: const Text('Sort'),

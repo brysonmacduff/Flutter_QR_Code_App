@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:ceg4912_project/Models/customer.dart';
 import 'package:ceg4912_project/Models/item.dart';
 import 'package:ceg4912_project/Models/merchant.dart';
@@ -6,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:ceg4912_project/Models/user.dart';
 import 'package:ceg4912_project/Models/receipt.dart';
+import 'package:ceg4912_project/Models/receipt_item.dart';
 
 // a public class of sql queries
 class Queries {
@@ -329,6 +332,21 @@ class Queries {
     }
   }
 
+  static editReceiptCid(MySqlConnection conn, int rId, int cId) async {
+    try {
+      String query = "update receipt set cid='" +
+          cId.toString() + "'"
+          " where rId='" +
+          rId.toString() + "';";
+
+      await conn.query(query);
+      return true;
+    } catch (e) {
+      print("editReceiptCid(): " + e.toString());
+      return false;
+    }
+  }
+
   // deletes an item by specifying its primary key id
   static deleteItem(MySqlConnection conn, int itemId) async {
     try {
@@ -337,30 +355,51 @@ class Queries {
 
       return true;
     } catch (e) {
-      print("delteItem(): " + e.toString());
+      print("deleteItem(): " + e.toString());
       return false;
     }
   }
 
-  static getMerchantReceipts(MySqlConnection conn, int mId) async {
-    String query = "select * from receipt where mid = '" + mId.toString() + "'";
-
+  static getMerchantReceipts(MySqlConnection conn, int mId, int cId) async {
+    String query =
+        "select * from receipt AS r JOIN receiptitem AS ri ON r.rid = ri.rid JOIN item as i ON ri.iId = i.iId where r.mId = '" +
+            mId.toString() +
+            "' and r.cid = '" +
+            cId.toString() +
+            "'";
     // result rows are in JSON format
     try {
       List<Receipt> receipts = <Receipt>[];
+      List<ReceiptItem> receiptItems = <ReceiptItem>[];
+      List<Item> items = <Item>[];
+
       var results = await conn.query(query);
       var iterator = results.iterator;
 
       while (iterator.moveNext()) {
         var result = iterator.current;
 
+        int itemId = result["iId"];
+        int mId = result["mid"];
+        String itemName = result["iName"];
+        String itemCode = result["iCode"];
+        String itemDetails = result["iDetails"];
+        Categories itemCategory = result["iCategory"];
+        double itemPrice = result["iPrice"];
+        bool itemTaxable = result["iTaxable"];
+
+        items.add(Item.all(itemId, mId, itemName, itemCode, itemDetails, itemCategory, itemPrice, itemTaxable));
+
+        for (Item i in items) {
+          receiptItems.add(ReceiptItem.create(i));
+        }
+
         int rId = result["rid"];
         DateTime dateTime = result["rDateTime"];
         double cost = double.parse(result["rCost"]);
-        int mId = result["mid"];
         int cId = result["cid"];
 
-        receipts.add(Receipt.no_items(rId, dateTime, cost, mId, cId));
+        receipts.add(Receipt.all(rId, dateTime, cost, mId, cId, receiptItems));
       }
 
       return receipts;
@@ -369,6 +408,29 @@ class Queries {
       return null;
     }
   }
+
+  // returns all customers that have a receipt at a given merchant
+  static getCustomerEmails(MySqlConnection conn, int mid) async {
+    String query =
+        "select cEmail from customer AS c JOIN receipt As r ON c.cid = r.cid JOIN merchant as m ON m.mid = r.mid where m.mId = '" +
+            mid.toString() +
+            "'";
+    try {
+      List<String> emails = <String>[];
+
+      var results = await conn.query(query);
+      var iterator = results.iterator;
+      while (iterator.moveNext()) {
+        var result = iterator.current;
+        String email = result["cEmail"];
+        emails.add(email);
+      }
+      return emails;
+    } catch (e) {
+      print(e);
+      return null;
+      }
+     }
 
   static getMaxReceiptId(MySqlConnection conn) async {
     String query = "select max(rId) as maxId from receipt";
