@@ -3,6 +3,7 @@ import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/item_page.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Support/utility.dart';
+import 'package:ceg4912_project/merchant_receipt_history.dart';
 import 'package:ceg4912_project/merchant_receipt_page.dart';
 import 'package:flutter/material.dart';
 import 'Models/user.dart';
@@ -52,7 +53,14 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
     MerchantReceiptPage.receiptItems.clear();
   }
 
-  void loadReceiptHistoryPage() {}
+  void loadReceiptHistoryPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const MerchantReceiptHistoryPage(),
+      ),
+    );
+  }
 
   void loadMerchantAccountPage() {}
 
