@@ -41,7 +41,7 @@ class _MerchantLabelPrintPageState extends State<MerchantLabelPrintPage> {
           alignment: Alignment.center,
           child: Zoom(
             child: BarcodeWidget(
-              data: _item.toJSON(),
+              data: _item.toLabelJSON(),
               barcode: Barcode.code128(),
               width: MediaQuery.of(context).size.width / 1.125,
               drawText: false,

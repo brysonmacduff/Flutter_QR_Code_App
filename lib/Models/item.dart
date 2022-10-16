@@ -103,16 +103,21 @@ class Item {
     }
   }
 
-  // converts customer-relevant data to JSON
+  // Converts customer-relevant data to JSON. This is used for representing items in receipt JSON data.
   String toJSON() {
     String json = "{" +
-        "'itemId':'" +
+        "\"iId\":\"" +
         _id.toString() +
-        "','name':'" +
+        "\",\"name\":\"" +
         _name +
-        "','price':'" +
+        "\",\"price\":\"" +
         _price.toString() +
-        "'}";
+        "\"}";
     return json;
+  }
+
+  // This is used for creating product label JSON data.
+  String toLabelJSON() {
+    return "{\"iId\":\"" + _id.toString() + "\"}";
   }
 }

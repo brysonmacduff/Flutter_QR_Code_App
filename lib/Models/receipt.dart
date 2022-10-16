@@ -1,12 +1,25 @@
+import 'package:ceg4912_project/Models/receipt_item.dart';
+
 class Receipt {
   int _id = -1;
   DateTime _dateTime = DateTime.now();
   double _cost = 0.00;
   int _mid = -1;
   int _cid = -1;
+  List<ReceiptItem> _receiptItems = [];
 
   Receipt.empty();
-  Receipt.all(int id, DateTime dateTime, double cost, int mid, int cid) {
+  Receipt.all(int id, DateTime dateTime, double cost, int mid, int cid,
+      List<ReceiptItem> receiptItems) {
+    _id = id;
+    _dateTime = dateTime;
+    _cost = cost;
+    _mid = mid;
+    _cid = cid;
+    _receiptItems = receiptItems;
+  }
+
+  Receipt.no_items(int id, DateTime dateTime, double cost, int mid, int cid) {
     _id = id;
     _dateTime = dateTime;
     _cost = cost;
@@ -32,5 +45,9 @@ class Receipt {
 
   int getCustomerId() {
     return _cid;
+  }
+
+  List<ReceiptItem> getReceiptItems() {
+    return _receiptItems;
   }
 }
