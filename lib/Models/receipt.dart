@@ -9,6 +9,7 @@ class Receipt {
   List<ReceiptItem> _receiptItems = [];
 
   Receipt.empty();
+
   Receipt.all(int id, DateTime dateTime, double cost, int mid, int cid, List<ReceiptItem> receiptItems) {
     _id = id;
     _dateTime = dateTime;

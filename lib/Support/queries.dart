@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:ceg4912_project/Models/customer.dart';
 import 'package:ceg4912_project/Models/item.dart';
 import 'package:ceg4912_project/Models/merchant.dart';
+import 'package:ceg4912_project/Models/receipt_item.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:ceg4912_project/Models/user.dart';
@@ -413,6 +414,62 @@ class Queries {
     } catch (e) {
       print(e);
       return null;
+      }
+     }
+
+  static getMaxReceiptId(MySqlConnection conn) async {
+    String query = "select max(rId) as maxId from receipt";
+    return await conn.query(query);
+  }
+
+  static _getMaxReceiptItemId(MySqlConnection conn) async {
+    String query = "select max(riid) as maxId from ReceiptItem";
+    return await conn.query(query);
+  }
+
+  // Inserts a receipt and its associated receipt items to the database.
+  // Receipt item has a database dependency with receipt, and receipt points to a merchant id.
+  // A customer will associate themselves to a receipt after it is created by the merchant.
+  static insertReceipt(MySqlConnection conn, Receipt receipt) async {
+    try {
+      // insert receipt tuple---------------------------------------------------
+      String query = "insert into receipt values('" +
+          receipt.getId().toString() +
+          "','" +
+          receipt.getDateTime().toString() +
+          "','" +
+          receipt.getCost().toString() +
+          "','" +
+          receipt.getMerchantId().toString() +
+          "','" +
+          receipt.getCustomerId().toString() +
+          "')";
+      await conn.query(query);
+
+      // insert receipt item tuples--------------------------------------------------
+      List<ReceiptItem> riList = receipt.getReceiptItems();
+      for (int i = 0; i < riList.length; i++) {
+        // get next receipt item id
+        ReceiptItem ri = riList[i];
+        var result = await _getMaxReceiptItemId(conn);
+        int receiptItemId = result.first["maxId"] + 1;
+        query = "insert into ReceiptItem values('" +
+            receiptItemId.toString() +
+            "','" +
+            ri.getQuanity().toString() +
+            "','" +
+            receipt.getId().toString() +
+            "','" +
+            ri.getItem().getItemId().toString() +
+            "')";
+        await conn.query(query);
+      }
+      return true;
+    } catch (e) {
+      print(
+          "Queries.insertReceipt(): Failed to insert receipt into the database. Error: " +
+              e.toString());
+      return false;
     }
   }
 }

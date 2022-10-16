@@ -1,3 +1,4 @@
+import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/merchant_receipt_qr_page.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,11 @@ import 'package:ceg4912_project/Support/utility.dart';
 import 'package:ceg4912_project/Models/receipt_item.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:ceg4912_project/merchant_receipt_item_page.dart';
+import 'package:ceg4912_project/Models/item.dart';
+import 'package:ceg4912_project/Models/receipt.dart';
+import 'dart:convert';
+
+import 'package:mysql1/mysql1.dart';
 
 class MerchantReceiptPage extends StatefulWidget {
   const MerchantReceiptPage({Key? key}) : super(key: key);
@@ -17,6 +23,10 @@ class MerchantReceiptPage extends StatefulWidget {
 }
 
 class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
+  // Stores all of the items that belong to this merchant. This is used for rapidly adding items to a receipt during label scanning.
+  // This list is populated on loading of this page. Data is passed from the merchant home page.
+  List<Item> merchantItems = List.empty();
+
   Map<int, Widget> receiptItemWidgets = Map<int, Widget>();
   double receiptPriceSum = 0;
 
@@ -49,22 +59,61 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
 
   // Opens a scan view that reads data from a 1D bar code label.
   Future<void> scanLabel() async {
+    // starts the barcode scan and returns the barcode data
     String result = await FlutterBarcodeScanner.scanBarcode(
         '#ff6666', 'Cancel', true, ScanMode.BARCODE);
     print("label data: " + result);
 
     // If the merchant cancels the scan then the result returns -1.
     if (result == "-1") {
+      // update the receipt page to represent the current state of the in-progress receipt
+      setState(() {
+        // generate the receipt item widgets in the UI
+        receiptItemWidgets = getReceiptItemWidgets();
+        updateReceiptPriceSum();
+      });
+
+      // exit if label scanning is complete
       return;
-    } else {
-      // After the scan, the scan view opens itself again so the merchant can scan the next item.
-      scanLabel();
     }
 
-    // WIP - Extract the label's JSON data and add the associated merchant item to the receipt.
-    // - Identify the merchant item that the label data points to
-    // - If its in the receipt item list then increment the quanity
-    // - If its not in the receipt item list then append it
+    // Add the scanned item to the receipt --------------------------------------------------------------------------------
+
+    // This item map will only contain the item id. We only care about the id right now.
+    Map itemMap = jsonDecode(result);
+    int iId = int.parse(itemMap["iId"]);
+
+    bool inReceipt = false;
+
+    // Look to see if the item is already on the receipt. If there, increment the item quanity.
+    for (int i = 0; i < MerchantReceiptPage.receiptItems.length; i++) {
+      ReceiptItem ri = MerchantReceiptPage.receiptItems[i];
+      if (ri.getItem().getItemId() == iId) {
+        ri.incrementQuantity();
+        MerchantReceiptPage.receiptItems[i] = ri;
+        inReceipt = true;
+        break;
+      }
+    }
+
+    // if the item was not found in the receipt, then add it
+    if (inReceipt == false) {
+      // find the item in the merchant items list that was scanned
+      for (int i = 0; i < merchantItems.length; i++) {
+        Item item = merchantItems[i];
+        if (iId == item.getItemId()) {
+          // add the scanned item to the receipt
+          ReceiptItem ri = ReceiptItem.create(item);
+          MerchantReceiptPage.receiptItems.add(ri);
+          break;
+        }
+      }
+    }
+
+    // if the label data is invalid then this function will not alter the receipt and will harmless return to the scan view
+
+    // After the scan, the scan view opens itself again so the merchant can scan the next item.
+    scanLabel();
   }
 
   // updates the receipt cost total in the UI
@@ -78,26 +127,51 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
   }
 
   // Convert receipt data to JSON and generate a QR code. Pushes a new page that has a big receipt QR code.
-  void finishReceipt() {
+  void finishReceipt() async {
     if (MerchantReceiptPage.receiptItems.isEmpty) {
       return;
     }
 
-    String qrData = "{'merchantId':'" +
-        Session.getSessionUser().getId().toString() +
-        "','items':";
+    MySqlConnection conn;
 
-    for (int i = 0; i < MerchantReceiptPage.receiptItems.length; i++) {
-      ReceiptItem ri = MerchantReceiptPage.receiptItems[i];
-      if (i == MerchantReceiptPage.receiptItems.length - 1) {
-        qrData += ri.toJSON();
-      } else {
-        qrData += ri.toJSON() + ",";
-      }
+    // get the next available receipt id from the database
+    int receiptId = -1;
+    try {
+      conn = await Queries.getConnection();
+      var result = await Queries.getMaxReceiptId(conn);
+      receiptId = result.first["maxId"] + 1;
+    } catch (e) {
+      print("Receipt ID SQL query failed.");
+      return;
     }
-    qrData += "}";
-    print(qrData);
 
+    // create receipt object
+    Receipt receipt = Receipt.all(
+        receiptId,
+        DateTime.now(),
+        receiptPriceSum,
+        Session.getSessionUser().getId(),
+        -1, // NOTE: the customer id argument is set to -1 since this information will be set by the customer when they scan the receipt
+        MerchantReceiptPage.receiptItems);
+
+    // Write the receipt to the database. Upon success, display the QR code that contains the receipt id to the customer to scan.
+    var insertionResult = false;
+    try {
+      conn = await Queries.getConnection();
+      insertionResult = await Queries.insertReceipt(conn, receipt);
+    } catch (e) {
+      print("Failed to insert receipt to the database.");
+      return;
+    }
+
+    if (insertionResult == false) {
+      return;
+    }
+
+    // this is the JSON data that will appear in the QR code receipt that is presented to the customer
+    String qrData = "{\"receiptId\":\"" + receiptId.toString() + "\"}";
+
+    // push the page that contains the qrData
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -225,6 +299,10 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
 
   @override
   Widget build(BuildContext context) {
+    // get the merchant items that belong to this merchant
+    merchantItems =
+        (ModalRoute.of(context)!.settings.arguments! as Map)["merchantItems"];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Receipt Page"),
