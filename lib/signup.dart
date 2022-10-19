@@ -2,11 +2,13 @@
 
 import 'dart:async';
 
+import 'package:ceg4912_project/homepage.dart';
 import 'package:flutter/material.dart';
 import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/Models/user.dart';
 import 'package:flutter/services.dart';
 import 'package:date_field/date_field.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -104,6 +106,10 @@ class _SignUpPageState extends State<SignUpPage> {
       // display sign up success message
       setEventMessage(
           "Sign Up Successful", const Color.fromARGB(255, 21, 255, 0));
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
     } else {
       // display error message
       setEventMessage("Sign Up Failed", const Color.fromARGB(255, 255, 0, 0));
@@ -204,6 +210,16 @@ class _SignUpPageState extends State<SignUpPage> {
   // adds the fields that are unique to the merchant
   void addMerchantFields(BuildContext context) async {
     merchantWidgets.addAll([
+      ElevatedButton(
+        onPressed: _launchURLApp,
+        style: ButtonStyle(
+            padding: MaterialStateProperty.all(const EdgeInsets.all(5)),
+            textStyle: MaterialStateProperty.all(
+                const TextStyle(color: Colors.black))),
+        // textColor: Colors.black,
+        // padding: const EdgeInsets.all(5.0),
+        child: const Text('Stripe Signup'),
+      ),
       TextField(
         decoration: const InputDecoration(labelText: 'First Name'),
         onChanged: (value) => firstName = value,
@@ -450,6 +466,15 @@ class _SignUpPageState extends State<SignUpPage> {
     setState(() {
       merchantWidgets.clear();
     });
+  }
+
+  _launchURLApp() async {
+    var url = Uri.parse("https://dashboard.stripe.com/register");
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
   @override

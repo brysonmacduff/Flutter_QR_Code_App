@@ -1,6 +1,7 @@
 // dependencies
 //import 'dart:html';
 
+import 'package:ceg4912_project/HomeScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
 
@@ -57,10 +58,18 @@ class _LogInPageState extends State<LogInPage> {
 
     if (user.getRole() == Roles.customer) {
       print("login as customer");
-      // go to customer home page
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => HomeScreen()), //go to customer home page
+      );
     } else if (user.getRole() == Roles.merchant) {
       print("login as merchant");
-      // go to merchant home page
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => HomePage()), // go to merchant home page
+      );
     }
   }
 
