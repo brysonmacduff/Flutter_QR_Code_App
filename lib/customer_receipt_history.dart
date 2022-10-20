@@ -12,6 +12,7 @@ class CustomerReceiptHistoryPageRoute extends StatelessWidget {
     return const MaterialApp(home: CustomerReceiptHistoryPage());
   }
 }
+
 class CustomerReceiptHistoryPage extends StatefulWidget {
   const CustomerReceiptHistoryPage({Key? key}) : super(key: key);
 
@@ -20,7 +21,6 @@ class CustomerReceiptHistoryPage extends StatefulWidget {
 }
 
 class _CustomerReceiptHistoryState extends State<CustomerReceiptHistoryPage> {
-
   // list of receipts
   List<Receipt> receipts = <Receipt>[];
   // stores the UI widgets that represent customer's receipts
@@ -87,7 +87,7 @@ class _CustomerReceiptHistoryState extends State<CustomerReceiptHistoryPage> {
   // expands the full details of an item to the UI
   void expandReceipt(int receiptIndex) {
     bool expandedState =
-    !receiptExpandedStateSet[receiptIndex]; // invert the state
+        !receiptExpandedStateSet[receiptIndex]; // invert the state
     receiptExpandedStateSet[receiptIndex] = expandedState;
     setState(() {
       receiptWidgets[receiptIndex] =
@@ -212,8 +212,8 @@ class _CustomerReceiptHistoryState extends State<CustomerReceiptHistoryPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: ListView(
+          //crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Open the drop down
             ElevatedButton(

@@ -47,24 +47,31 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
 **/
 
   Future<void> loadScanReceiptPage() async {
-
     String result = await FlutterBarcodeScanner.scanBarcode(
         '#ff6666', 'Cancel', true, ScanMode.QR);
     print("label data: " + result);
-    
+
+    // Exit out of here if the user cancelled. The return is -1 in this case.
+    if (result == "-1") {
+      return;
+    }
+
     Map extractID = jsonDecode(result);
     print(extractID["receiptId"]);
     int receiptId = int.parse(extractID["receiptId"]);
 
     int userId = Session.getSessionUser().getId();
-    try{
+    try {
       MySqlConnection connection = await Queries.getConnection();
       bool success = false;
       Queries.editReceiptCid(connection, receiptId, userId);
       success = true;
-      print("####################################################### RECEIPT SUCCESS? " + success.toString());
-    }catch(e){
-      print("############################## EXCEPTION ######################################");
+      print(
+          "####################################################### RECEIPT SUCCESS? " +
+              success.toString());
+    } catch (e) {
+      print(
+          "############################## EXCEPTION ######################################");
     }
     showAlertDialog(context);
   }
@@ -94,11 +101,12 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   }
 
   showAlertDialog(BuildContext context) {
-
     // set up the button
     Widget okButton = TextButton(
       child: const Text("OK"),
-      onPressed: () {Navigator.pop(context); },
+      onPressed: () {
+        Navigator.pop(context);
+      },
     );
 
     // set up the AlertDialog
