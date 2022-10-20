@@ -409,10 +409,74 @@ class Queries {
     }
   }
 
+  static getCustomerReceipts(MySqlConnection conn, int cId) async {
+    String query =
+        "select * from receipt where cid = '" +
+            cId.toString() +
+            "'";
+    // result rows are in JSON format
+    try {
+      List<Receipt> receipts = <Receipt>[];
+      List<ReceiptItem> receiptItems = <ReceiptItem>[];
+      List<Item> items = <Item>[];
+
+      var results = await conn.query(query);
+      var iterator = results.iterator;
+
+      while (iterator.moveNext()) {
+        var result = iterator.current;
+
+        //TODO: Update Query so that receipt items are returned
+        '''
+        int itemId = result["iId"];
+        int mId = result["mid"];
+        String itemName = result["iName"].toString();
+        String itemCode = result["iCode"].toString();
+        String itemDetails = result["iDetails"].toString();
+        String itemCategory = result["iCategory"];
+        double itemPrice = result["iPrice"];
+        int itemTaxable = result["iTaxable"];
+
+        bool taxable = false;
+        // mysql stores booleans as integers but only lets them be 1 or 0.
+        if (itemTaxable == 1) {
+          taxable = true;
+        }
+
+        Categories category = Categories.none;
+
+        // this looks redundant now but will be extended as more categories are included
+        if (itemCategory == "none") {
+          category = Categories.none;
+        }
+
+        items.add(Item.all(itemId, mId, itemName, itemCode, itemDetails, category, itemPrice, taxable));
+
+        for (Item i in items) {
+          receiptItems.add(ReceiptItem.create(i));
+        }
+        ''';
+
+        int mId = result["mid"];
+        int rId = result["rid"];
+        DateTime dateTime = result["rDateTime"];
+        double cost = double.parse(result["rCost"]);
+        int cId = result["cid"];
+
+        receipts.add(Receipt.all(rId, dateTime, cost, mId, cId, receiptItems));
+      }
+
+      return receipts;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
   // returns all customers that have a receipt at a given merchant
   static getCustomerEmails(MySqlConnection conn, int mid) async {
     String query =
-        "select cEmail from customer AS c JOIN receipt As r ON c.cid = r.cid JOIN merchant as m ON m.mid = r.mid where m.mId = '" +
+        "select Distinct cEmail from customer AS c JOIN receipt As r ON c.cid = r.cid JOIN merchant as m ON m.mid = r.mid where m.mId = '" +
             mid.toString() +
             "'";
     try {

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:ceg4912_project/Support/queries.dart';
+import 'package:ceg4912_project/customer_receipt_history.dart';
 import 'package:ceg4912_project/item_page.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Support/utility.dart';
@@ -70,7 +71,14 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
 
   void loadCustomerAccountPage() {}
 
-  void loadReceiptHistoryPage() {}
+  void loadReceiptHistoryPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const CustomerReceiptHistoryPage(),
+      ),
+    );
+  }
 
   void loadSettings() {
     // Does nothing right now. WIP.
