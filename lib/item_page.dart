@@ -1,9 +1,9 @@
+import 'package:ceg4912_project/Support/utility.dart';
 import 'package:ceg4912_project/edit_item_page.dart';
 import 'package:ceg4912_project/merchant_label_print_page.dart';
 import 'package:ceg4912_project/new_item_page.dart';
 import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/Support/session.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ceg4912_project/Models/item.dart';
 
@@ -23,13 +23,6 @@ class _ItemPageState extends State<ItemPage> {
   List<Widget> itemWidgets = <Widget>[];
   // keeps track of which item widgets are expanded in the UI
   List<bool> itemExpandedStateSet = <bool>[];
-  // keeps track of which items the user may be attempting to delete
-  List<bool> itemDeletionStateSet = <bool>[];
-
-  // the color of event messages that are displayed to the user
-  Color eventMessageColor = Colors.white;
-  // the message that is displayed to the user to inform them of events
-  String eventMessage = "";
 
   // initially get the merchant's business items upon loading the item page
   @override
@@ -41,18 +34,21 @@ class _ItemPageState extends State<ItemPage> {
   // generates widgets for all of the current merchant's business items
   void getItems() async {
     int mId = Session.getSessionUser().getId();
-    var conn = await Queries.getConnection();
-    var mItems = await Queries.getMerchantItems(conn, mId);
+    var conn;
+    var mItems;
 
-    // if the query went wrong then it would return null
-    if (mItems == null) {
-      setState(() {
-        eventMessage = "Item Retrieval Failed.";
-        eventMessageColor = Colors.red;
-      });
-
-      // clears the event message after 2 seconds have passed
-      clearEventMessage(2000);
+    try {
+      conn = await Queries.getConnection();
+      mItems = await Queries.getMerchantItems(conn, mId);
+      // if the query went wrong then it would return null
+      if (mItems == null) {
+        Utility.displayAlertMessage(context, "Failed to Retrieve Items",
+            "Something went wrong. Please check your network connection.");
+        return;
+      }
+    } catch (e) {
+      Utility.displayAlertMessage(context, "Failed to Retrieve Data",
+          "Please check your network connection.");
       return;
     }
 
@@ -60,15 +56,13 @@ class _ItemPageState extends State<ItemPage> {
     items.clear();
     itemWidgets.clear();
     itemExpandedStateSet.clear();
-    itemDeletionStateSet.clear();
 
     for (int i = 0; i < mItems.length; i++) {
       items.add(mItems[i]);
       itemExpandedStateSet.add(false);
-      itemDeletionStateSet.add(false);
 
       setState(() {
-        itemWidgets.add(getItemWidget(i, false, false));
+        itemWidgets.add(getItemWidget(i, false));
       });
     }
   }
@@ -83,46 +77,12 @@ class _ItemPageState extends State<ItemPage> {
     ).then((value) => getItems());
   }
 
-  // permanently deletes an item from the database
-  void deleteItem(int itemIndex) async {
-    var conn = await Queries.getConnection();
-    int iId = items[itemIndex].getItemId();
-    var result = await Queries.deleteItem(conn, iId);
-
-    setState(() {
-      if (!result) {
-        eventMessage = "Item Deletion Failed";
-        eventMessageColor = Colors.red;
-        // clears the event message after 2 seconds have passed
-        clearEventMessage(2000);
-        return;
-      }
-
-      // remove the widget from the UI that represented the deleted item
-      // refresh the items page after a deletion
-      getItems();
-    });
-  }
-
-  // toggles the prompt that the user uses to confirm their intention to delete an item
-  void toggleItemDeletionPrompt(int itemIndex) {
-    bool deletionState = !itemDeletionStateSet[itemIndex]; // invert the state
-    bool expandedState = itemExpandedStateSet[itemIndex];
-    itemDeletionStateSet[itemIndex] = deletionState;
-    setState(() {
-      itemWidgets[itemIndex] =
-          getItemWidget(itemIndex, expandedState, deletionState);
-    });
-  }
-
   // expands the full details of an item to the UI
   void expandItem(int itemIndex) {
     bool expandedState = !itemExpandedStateSet[itemIndex]; // invert the state
-    bool deletionState = itemDeletionStateSet[itemIndex];
     itemExpandedStateSet[itemIndex] = expandedState;
     setState(() {
-      itemWidgets[itemIndex] =
-          getItemWidget(itemIndex, expandedState, deletionState);
+      itemWidgets[itemIndex] = getItemWidget(itemIndex, expandedState);
     });
   }
 
@@ -152,79 +112,60 @@ class _ItemPageState extends State<ItemPage> {
     );
   }
 
-  // clears the event message after some time has passed
-  void clearEventMessage(int delay) {
-    Future.delayed(Duration(milliseconds: delay), () {
-      setState(() {
-        eventMessage = "";
-        eventMessageColor = Colors.white;
-      });
-    });
-  }
-
   // returns a widget that represents a business item
-  Widget getItemWidget(int i, bool isExpanded, bool isDeleting) {
+  Widget getItemWidget(int i, bool isExpanded) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(8),
       child: Container(
-        color: const Color.fromARGB(255, 46, 73, 107),
+        color: Utility.getBackGroundColor(),
         child: Column(
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Flexible(
-                  child: Text(
-                    items[i].getName(),
-                    textAlign: TextAlign.start,
-                    style: const TextStyle(
-                      color: Color.fromARGB(255, 255, 255, 255),
-                      fontSize: 20,
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Text(
+                        items[i].getName(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-                IconButton(
-                  onPressed: () => {expandItem(i)},
-                  icon: const Icon(
-                    Icons.description,
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
                     color: Colors.blue,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => {editItem(i)},
-                  icon: const Icon(
-                    Icons.edit,
-                    color: Colors.blue,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => {printItemLabel(i)},
-                  icon: const Icon(Icons.print, color: Colors.blue),
-                ),
-                if (!isDeleting)
-                  IconButton(
-                    onPressed: () => {toggleItemDeletionPrompt(i)},
-                    icon: const Icon(
-                      Icons.delete,
-                      color: Colors.red,
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => {expandItem(i)},
+                          icon: const Icon(
+                            Icons.description,
+                            color: Colors.white,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => {editItem(i)},
+                          icon: const Icon(
+                            Icons.edit,
+                            color: Colors.white,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => {printItemLabel(i)},
+                          icon: const Icon(Icons.print, color: Colors.white),
+                        ),
+                      ],
                     ),
                   ),
-                if (isDeleting)
-                  IconButton(
-                    onPressed: () => {deleteItem(i)},
-                    icon: const Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
-                    ),
-                  ),
-                if (isDeleting)
-                  IconButton(
-                    onPressed: () => {toggleItemDeletionPrompt(i)},
-                    icon: const Icon(
-                      Icons.cancel,
-                      color: Colors.red,
-                    ),
-                  ),
+                ),
               ],
             ),
             if (isExpanded)
@@ -329,36 +270,13 @@ class _ItemPageState extends State<ItemPage> {
       ),
       body: ListView(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                onPressed: getItems,
-                icon: const Icon(Icons.refresh),
-                color: Colors.blue,
-              ),
-              /*IconButton(
-                onPressed: createItem,
-                icon: const Icon(Icons.add),
-                color: const Color.fromARGB(255, 46, 73, 107),
-              ),*/
-            ],
+          IconButton(
+            onPressed: getItems,
+            icon: const Icon(Icons.refresh),
+            color: Colors.blue,
           ),
           Column(
             children: itemWidgets,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              eventMessage,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: eventMessageColor,
-                fontSize: 20,
-              ),
-            ),
           ),
         ],
       ),

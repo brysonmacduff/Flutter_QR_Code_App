@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/item_page.dart';
 import 'package:ceg4912_project/Support/session.dart';
@@ -30,8 +29,16 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
 
   void loadReceiptPage() async {
     int mId = Session.getSessionUser().getId();
-    var conn = await Queries.getConnection();
-    var mItems = await Queries.getMerchantItems(conn, mId);
+
+    var conn;
+    var mItems;
+    try {
+      conn = await Queries.getConnection();
+      mItems = await Queries.getMerchantItems(conn, mId);
+    } catch (e) {
+      Utility.displayAlertMessage(context, "Failed to Retrieve Data",
+          "Please check your network connection.");
+    }
 
     // exit if something went wrong
     if (mItems == null) {

@@ -23,10 +23,6 @@ class ReceiptItemPageState extends State<ReceiptItemPage> {
   // stores the checked state of each item widget checkbox
   List<bool> checkboxValues = List<bool>.empty(growable: true);
 
-  // used for altering the user of errors, warnings, and other events
-  String eventMessage = "";
-  Color eventMessageColor = Colors.white;
-
   // fetches the merchant's business items from the database on load of the page
   @override
   void initState() {
@@ -36,17 +32,19 @@ class ReceiptItemPageState extends State<ReceiptItemPage> {
 
   void getBusinessItems() async {
     int mId = Session.getSessionUser().getId();
-    var conn = await Queries.getConnection();
-    var mItems = await Queries.getMerchantItems(conn, mId);
 
-    // if the query went wrong then it would return null
-    if (mItems == null) {
-      setState(() {
-        eventMessage = "Item Retrieval Failed.";
-        eventMessageColor = Colors.red;
-      });
+    var mItems;
+    try {
+      var conn = await Queries.getConnection();
+      mItems = await Queries.getMerchantItems(conn, mId);
 
-      clearEventMessage(2000);
+      if (mItems == null) {
+        Utility.displayAlertMessage(context, "Item Retrieval Failed", "");
+        return;
+      }
+    } catch (e) {
+      Utility.displayAlertMessage(
+          context, "Connection Error", "Please check your network connection.");
       return;
     }
 
@@ -58,7 +56,6 @@ class ReceiptItemPageState extends State<ReceiptItemPage> {
     // update the UI to show the item widgets
     setState(() {
       itemWidgets = getItemWidgets();
-      print("widget count: " + itemWidgets.length.toString());
     });
   }
 
@@ -94,7 +91,7 @@ class ReceiptItemPageState extends State<ReceiptItemPage> {
       padding: const EdgeInsets.all(8),
       child: Container(
         color: Utility.getBackGroundColor(),
-        height: 100,
+        height: 75,
         width: MediaQuery.of(context).size.width,
         child: Row(
           children: [
@@ -169,16 +166,6 @@ class ReceiptItemPageState extends State<ReceiptItemPage> {
     Navigator.pop(context);
   }
 
-  // clears the event message after some time has passed
-  void clearEventMessage(int delay) {
-    Future.delayed(Duration(milliseconds: delay), () {
-      setState(() {
-        eventMessage = "";
-        eventMessageColor = Colors.white;
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -190,24 +177,19 @@ class ReceiptItemPageState extends State<ReceiptItemPage> {
         children: [
           Padding(
             padding: const EdgeInsets.all(8),
-            child: TextButton(
-              child: const Text("Submit"),
-              onPressed: submitReceiptItems,
+            child: Container(
+              color: Utility.getBackGroundColor(),
+              child: TextButton(
+                child: const Text(
+                  "Submit",
+                  style: TextStyle(color: Colors.white),
+                ),
+                onPressed: submitReceiptItems,
+              ),
             ),
           ),
-
           // contains the UI widgets that represent all of the merchant's business items
           Column(children: itemWidgets),
-
-          // displays event messages to the user
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Text(
-              eventMessage,
-              style: TextStyle(color: eventMessageColor),
-              textAlign: TextAlign.center,
-            ),
-          ),
         ],
       ),
     );
