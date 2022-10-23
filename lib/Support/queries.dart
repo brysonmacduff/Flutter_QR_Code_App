@@ -21,8 +21,11 @@ class Queries {
         password: '51fb516c',
         db: 'heroku_3eb2baaa59ea134');
 
-    var conn = await MySqlConnection.connect(settings);
-    return conn;
+    try {
+      return await MySqlConnection.connect(settings);
+    } catch (e) {
+      return;
+    }
   }
 
   // returns a user by email and password
@@ -335,9 +338,11 @@ class Queries {
   static editReceiptCid(MySqlConnection conn, int rId, int cId) async {
     try {
       String query = "update receipt set cid='" +
-          cId.toString() + "'"
-          " where rId='" +
-          rId.toString() + "';";
+          cId.toString() +
+          "'"
+              " where rId='" +
+          rId.toString() +
+          "';";
 
       await conn.query(query);
       return true;
@@ -388,7 +393,8 @@ class Queries {
         double itemPrice = result["iPrice"];
         bool itemTaxable = result["iTaxable"];
 
-        items.add(Item.all(itemId, mId, itemName, itemCode, itemDetails, itemCategory, itemPrice, itemTaxable));
+        items.add(Item.all(itemId, mId, itemName, itemCode, itemDetails,
+            itemCategory, itemPrice, itemTaxable));
 
         for (Item i in items) {
           receiptItems.add(ReceiptItem.create(i));
@@ -410,10 +416,7 @@ class Queries {
   }
 
   static getCustomerReceipts(MySqlConnection conn, int cId) async {
-    String query =
-        "select * from receipt where cid = '" +
-            cId.toString() +
-            "'";
+    String query = "select * from receipt where cid = '" + cId.toString() + "'";
     // result rows are in JSON format
     try {
       List<Receipt> receipts = <Receipt>[];
@@ -493,8 +496,8 @@ class Queries {
     } catch (e) {
       print(e);
       return null;
-      }
-     }
+    }
+  }
 
   static getMaxReceiptId(MySqlConnection conn) async {
     String query = "select max(rId) as maxId from receipt";

@@ -1,7 +1,7 @@
 import 'package:ceg4912_project/Support/queries.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ceg4912_project/Models/item.dart';
+import 'package:ceg4912_project/Support/utility.dart';
 
 class EditItemPage extends StatefulWidget {
   const EditItemPage({Key? key}) : super(key: key);
@@ -30,8 +30,6 @@ class _EditItemPageState extends State<EditItemPage> {
   String code = EditItemPage.getCurrentItem().getCode();
   String price = EditItemPage.getCurrentItem().getPrice().toString();
 
-  String eventMessage = "";
-  Color eventMessageColor = Colors.white;
   // Used for setting the values of the input fields. They must be initially populated with the existing item data before editing.
   var nameTEC =
       TextEditingController(text: EditItemPage.getCurrentItem().getName());
@@ -45,13 +43,8 @@ class _EditItemPageState extends State<EditItemPage> {
   // overwrites the current item's attributes in the database and here locally
   void editItem() async {
     if (!areItemFieldsValid()) {
-      setState(() {
-        eventMessage = "Item Data is Invalid";
-        eventMessageColor = Colors.red;
-      });
-
-      // message will be cleared after 2 seconds
-      clearEventMessage(2000);
+      Utility.displayAlertMessage(
+          context, "Invalid Item Data", "Please enter valid item data.");
       return;
     }
 
@@ -65,31 +58,18 @@ class _EditItemPageState extends State<EditItemPage> {
         double.parse(price),
         currentItem.isTaxable());
 
-    var conn = await Queries.getConnection();
-    var result = await Queries.editItem(conn, currentItem);
-
-    setState(() {
-      if (result) {
-        eventMessage = "Edit Complete";
-        eventMessageColor = Colors.green;
+    try {
+      var conn = await Queries.getConnection();
+      var result = await Queries.editItem(conn, currentItem);
+      if (!result) {
+        Utility.displayAlertMessage(context, "Item Edit Failed", "");
       } else {
-        eventMessage = "Edit Failed";
-        eventMessageColor = Colors.red;
+        Utility.displayAlertMessage(context, "Item Edit Successful", "");
       }
-    });
-
-    // message will be cleared after 2 seconds
-    clearEventMessage(2000);
-  }
-
-  // clears the event message after some time has passed
-  void clearEventMessage(int delay) {
-    Future.delayed(Duration(milliseconds: delay), () {
-      setState(() {
-        eventMessage = "";
-        eventMessageColor = Colors.white;
-      });
-    });
+    } catch (e) {
+      Utility.displayAlertMessage(
+          context, "Connection Error", "Please check your network connection.");
+    }
   }
 
   // checks if all of the user's input data for the item is valid
@@ -120,14 +100,14 @@ class _EditItemPageState extends State<EditItemPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Edit Item Page"),
-        backgroundColor: const Color.fromARGB(255, 46, 73, 107),
+        backgroundColor: Utility.getBackGroundColor(),
       ),
       body: ListView(
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: TextField(
                 controller: nameTEC,
                 decoration: const InputDecoration(labelText: "Item Name"),
@@ -136,7 +116,7 @@ class _EditItemPageState extends State<EditItemPage> {
                 }),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: TextField(
                 controller: detailsTEC,
                 decoration: const InputDecoration(labelText: "Details"),
@@ -145,7 +125,7 @@ class _EditItemPageState extends State<EditItemPage> {
                 }),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: TextField(
               controller: codeTEC,
               decoration: const InputDecoration(labelText: "Code"),
@@ -154,8 +134,16 @@ class _EditItemPageState extends State<EditItemPage> {
               },
             ),
           ),
+          const Padding(
+            padding: EdgeInsets.all(8),
+            child: Text(
+              "Category",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: DropdownButtonFormField<String>(
               items: const [
                 DropdownMenuItem(
@@ -176,7 +164,7 @@ class _EditItemPageState extends State<EditItemPage> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: TextFormField(
               keyboardType: const TextInputType.numberWithOptions(
                 signed: false,
@@ -190,26 +178,26 @@ class _EditItemPageState extends State<EditItemPage> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: Container(
-              color: const Color.fromARGB(255, 46, 73, 107),
+              color: Utility.getBackGroundColor(),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Padding(
-                    padding: EdgeInsets.all(16),
+                    padding: EdgeInsets.all(8),
                     child: Text(
                       "Taxable?",
                       style: TextStyle(
                         fontSize: 16,
-                        color: Color.fromARGB(255, 255, 255, 255),
+                        color: Colors.white,
                       ),
                     ),
                   ),
                   Checkbox(
                     value: currentItem.isTaxable(),
                     side: const BorderSide(
-                      color: Color.fromARGB(255, 255, 255, 255),
+                      color: Colors.white,
                     ),
                     onChanged: (value) {
                       setState(() {
@@ -221,25 +209,19 @@ class _EditItemPageState extends State<EditItemPage> {
               ),
             ),
           ),
-          TextButton(
-            onPressed: editItem,
-            child: const Text(
-              "Submit",
-              style: TextStyle(
-                color: Colors.blue,
-              ),
-            ),
-          ),
           Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              eventMessage,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: eventMessageColor,
-                fontSize: 20,
+            padding: const EdgeInsets.all(8),
+            child: Container(
+              width: MediaQuery.of(context).size.width / 3,
+              color: Utility.getBackGroundColor(),
+              child: TextButton(
+                onPressed: editItem,
+                child: const Text(
+                  "Submit",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ),

@@ -129,6 +129,8 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
   // Convert receipt data to JSON and generate a QR code. Pushes a new page that has a big receipt QR code.
   void finishReceipt() async {
     if (MerchantReceiptPage.receiptItems.isEmpty) {
+      Utility.displayAlertMessage(
+          context, "Receipt Creation Failed", "Your receipt has no items.");
       return;
     }
 
@@ -141,7 +143,8 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
       var result = await Queries.getMaxReceiptId(conn);
       receiptId = result.first["maxId"] + 1;
     } catch (e) {
-      print("Receipt ID SQL query failed.");
+      Utility.displayAlertMessage(
+          context, "Connection Error", "Please check your network connection.");
       return;
     }
 
@@ -159,12 +162,13 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
     try {
       conn = await Queries.getConnection();
       insertionResult = await Queries.insertReceipt(conn, receipt);
+      if (!insertionResult) {
+        Utility.displayAlertMessage(context, "Receipt Creation Failed", "");
+        return;
+      }
     } catch (e) {
-      print("Failed to insert receipt to the database.");
-      return;
-    }
-
-    if (insertionResult == false) {
+      Utility.displayAlertMessage(
+          context, "Connection Error", "Please check your network connection.");
       return;
     }
 
@@ -193,7 +197,6 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
       final pair = <int, Widget>{id: widget};
       pairs.addAll(pair);
     }
-    print("receipt item widget count: " + pairs.length.toString());
     return pairs;
   }
 

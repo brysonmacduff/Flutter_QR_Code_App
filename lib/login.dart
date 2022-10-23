@@ -1,6 +1,7 @@
 // dependencies
 //import 'dart:html';
 
+import 'package:ceg4912_project/Support/utility.dart';
 import 'package:ceg4912_project/merchant_home.dart';
 import 'package:ceg4912_project/customer_home.dart';
 import 'package:flutter/material.dart';
@@ -45,13 +46,20 @@ class _LogInPageState extends State<LogInPage> {
   void signIn() async {
     /* currently configured to connect to the test ClearDB database 
     that is integrated with Heroku */
+    var user;
+    try {
+      var conn = await Queries.getConnection();
+      user = await Queries.getUser(conn, email, password);
 
-    var conn = await Queries.getConnection();
-    var user = await Queries.getUser(conn, email, password);
-
-    if (user == null) {
-      // login failed
-      print("login failed");
+      if (user == null) {
+        // login failed
+        Utility.displayAlertMessage(context, "Sign In Failed",
+            "Please check your account credentials.");
+        return;
+      }
+    } catch (e) {
+      Utility.displayAlertMessage(
+          context, "Sign In Failed", "Please check your network connection.");
       return;
     }
 
@@ -101,27 +109,54 @@ class _LogInPageState extends State<LogInPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Log In"),
-        backgroundColor: const Color.fromARGB(255, 46, 73, 107),
+        title: const Text("POP Code"),
+        backgroundColor: Utility.getBackGroundColor(),
       ),
       body: Center(
         child: Column(
           children: [
-            TextField(
-              decoration: const InputDecoration(labelText: 'Email'),
-              onChanged: (value) => email = value,
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: TextField(
+                decoration: const InputDecoration(labelText: 'Email'),
+                onChanged: (value) => email = value,
+              ),
             ),
-            TextField(
-              decoration: const InputDecoration(labelText: 'Password'),
-              onChanged: (value) => password = value,
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: TextField(
+                obscureText: true,
+                decoration: const InputDecoration(labelText: 'Password'),
+                onChanged: (value) => password = value,
+              ),
             ),
-            TextButton(
-              onPressed: signIn,
-              child: const Text("Sign In"),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Container(
+                width: MediaQuery.of(context).size.width / 3,
+                color: Utility.getBackGroundColor(),
+                child: TextButton(
+                  onPressed: signIn,
+                  child: const Text(
+                    "Sign In",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
             ),
-            TextButton(
-              onPressed: loadSignUpPage,
-              child: const Text("Sign Up"),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Container(
+                color: Utility.getBackGroundColor(),
+                width: MediaQuery.of(context).size.width / 3,
+                child: TextButton(
+                  onPressed: loadSignUpPage,
+                  child: const Text(
+                    "Sign Up",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
             ),
           ],
         ),

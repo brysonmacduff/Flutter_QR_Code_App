@@ -1,9 +1,8 @@
-import 'package:ceg4912_project/edit_item_page.dart';
 import 'package:ceg4912_project/Models/item.dart';
 import 'package:ceg4912_project/Support/session.dart';
+import 'package:ceg4912_project/Support/utility.dart';
 import 'package:flutter/material.dart';
 import 'package:ceg4912_project/Support/queries.dart';
-import 'package:flutter/services.dart';
 
 class NewItemPage extends StatefulWidget {
   const NewItemPage({Key? key}) : super(key: key);
@@ -20,46 +19,34 @@ class _NewItemPageState extends State<NewItemPage> {
   String price = "";
   bool taxable = true;
 
-  String createItemEventMessage = "";
-  Color createItemEventColor = Colors.white;
-
   // attempts to create a new item for this merchant
   void createItem() async {
-    var conn = await Queries.getConnection();
-
     if (!areItemFieldsValid()) {
-      setState(() {
-        createItemEventMessage = "Item Data is Invalid";
-        createItemEventColor = Colors.red;
-      });
-
-      // clears the event message after 2 seconds have passed
-      clearEventMessage(2000);
+      Utility.displayAlertMessage(
+          context, "Invalid Item Data", "Please enter valid item data.");
       return;
     }
 
-    var result = await Queries.insertItem(
-        conn,
-        Session.getSessionUser().getId(),
-        itemName,
-        details,
-        code,
-        category,
-        price,
-        taxable);
-
-    setState(() {
+    try {
+      var conn = await Queries.getConnection();
+      var result = await Queries.insertItem(
+          conn,
+          Session.getSessionUser().getId(),
+          itemName,
+          details,
+          code,
+          category,
+          price,
+          taxable);
       if (!result) {
-        createItemEventMessage = "Failed to Create Item";
-        createItemEventColor = Colors.red;
+        Utility.displayAlertMessage(context, "Item Creation Failed", "");
       } else {
-        createItemEventMessage = "Item Has Been Created";
-        createItemEventColor = Colors.green;
+        Utility.displayAlertMessage(context, "Item Creation Successful", "");
       }
-    });
-
-    // clears the event message after 2 seconds have passed
-    clearEventMessage(2000);
+    } catch (e) {
+      Utility.displayAlertMessage(
+          context, "Connection Error", "Please check your network connection.");
+    }
   }
 
   // checks if all of the user's input data for the item is valid
@@ -85,47 +72,45 @@ class _NewItemPageState extends State<NewItemPage> {
     return true;
   }
 
-  // clears the event message after some time has passed
-  void clearEventMessage(int delay) {
-    Future.delayed(Duration(milliseconds: delay), () {
-      setState(() {
-        createItemEventMessage = "";
-        createItemEventColor = Colors.white;
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("New Item Page"),
-        backgroundColor: const Color.fromARGB(255, 46, 73, 107),
+        backgroundColor: Utility.getBackGroundColor(),
       ),
       body: ListView(
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: TextField(
                 decoration: const InputDecoration(labelText: "Item Name"),
                 onChanged: (value) => itemName = value),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: TextField(
                 decoration: const InputDecoration(labelText: "Details"),
                 onChanged: (value) => details = value),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: TextField(
                 decoration: const InputDecoration(labelText: "Code"),
                 onChanged: (value) => code = value),
           ),
+          const Padding(
+            padding: EdgeInsets.all(8),
+            child: Text(
+              "Category",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: DropdownButtonFormField<String>(
               items: const [
                 DropdownMenuItem(
@@ -146,7 +131,7 @@ class _NewItemPageState extends State<NewItemPage> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: TextFormField(
               keyboardType: const TextInputType.numberWithOptions(
                 signed: false,
@@ -157,31 +142,30 @@ class _NewItemPageState extends State<NewItemPage> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: Container(
-              color: const Color.fromARGB(255, 46, 73, 107),
+              color: Utility.getBackGroundColor(),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Padding(
-                    padding: EdgeInsets.all(16),
+                    padding: EdgeInsets.all(8),
                     child: Text(
                       "Taxable?",
                       style: TextStyle(
                         fontSize: 16,
-                        color: Color.fromARGB(255, 255, 255, 255),
+                        color: Colors.white,
                       ),
                     ),
                   ),
                   Checkbox(
                     value: taxable,
                     side: const BorderSide(
-                      color: Color.fromARGB(255, 255, 255, 255),
+                      color: Colors.white,
                     ),
                     onChanged: (value) {
                       setState(() {
                         taxable = value!;
-                        print(taxable);
                       });
                     },
                   ),
@@ -189,25 +173,19 @@ class _NewItemPageState extends State<NewItemPage> {
               ),
             ),
           ),
-          TextButton(
-            onPressed: createItem,
-            child: const Text(
-              "Submit",
-              style: TextStyle(
-                color: Colors.blue,
-              ),
-            ),
-          ),
           Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              createItemEventMessage,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: createItemEventColor,
-                fontSize: 20,
+            padding: const EdgeInsets.all(8),
+            child: Container(
+              width: MediaQuery.of(context).size.width / 3,
+              color: Utility.getBackGroundColor(),
+              child: TextButton(
+                onPressed: createItem,
+                child: const Text(
+                  "Submit",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ),
