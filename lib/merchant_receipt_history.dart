@@ -99,6 +99,7 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
   List<bool> receiptExpandedStateSet = <bool>[];
   //Stores all customers
   List<String> customerEmails = <String>[];
+  List<int> customerIds = <int>[];
 
   // the color of event messages that are displayed to the user
   Color eventMessageColor = Colors.white;
@@ -112,13 +113,14 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
     _getReceipts();
   }
 
-  void loadMerchantFilterPage() {
-    Navigator.push(
+  Future<void> loadMerchantFilterPage() async {
+    var result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => const MerchantFilter(),
       ),
     );
+    print(result);
   }
 
   // generates widgets for all of the current merchant's business receipt

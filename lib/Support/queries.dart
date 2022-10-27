@@ -365,6 +365,25 @@ class Queries {
     }
   }
 
+  static getCustomerIdByEmail(MySqlConnection conn, String email) async {
+
+    // result rows are in JSON format
+    try {
+      String query = "select cid from customer where cEmail = '" + email.toString() + "'";
+
+      var results = (await conn.query(query));
+      var iterator = results.iterator;
+
+      while(iterator.moveNext()) {
+        var current = iterator.current;
+        int cid = current["cid"];
+        return cid;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
   static getMerchantReceipts(MySqlConnection conn, int mId, int cId) async {
     String query =
         "select * from receipt AS r JOIN receiptitem AS ri ON r.rid = ri.rid JOIN item as i ON ri.iId = i.iId where r.mId = '" +
