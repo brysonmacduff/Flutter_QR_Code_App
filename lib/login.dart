@@ -17,6 +17,8 @@ import 'package:ceg4912_project/Support/session.dart';
 // model files
 import 'package:ceg4912_project/Models/user.dart';
 
+import 'HomeScreen.dart';
+
 //import 'item_page.dart';
 
 class LogInPageRoute extends StatelessWidget {
@@ -101,7 +103,7 @@ class _LogInPageState extends State<LogInPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => const CustomerHomePage(),
+        builder: (_) => const HomeScreen(),
       ),
     );
   }
