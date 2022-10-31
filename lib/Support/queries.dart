@@ -366,15 +366,15 @@ class Queries {
   }
 
   static getCustomerIdByEmail(MySqlConnection conn, String email) async {
-
     // result rows are in JSON format
     try {
-      String query = "select cid from customer where cEmail = '" + email.toString() + "'";
+      String query =
+          "select cid from customer where cEmail = '" + email.toString() + "'";
 
       var results = (await conn.query(query));
       var iterator = results.iterator;
 
-      while(iterator.moveNext()) {
+      while (iterator.moveNext()) {
         var current = iterator.current;
         int cid = current["cid"];
         return cid;
@@ -515,6 +515,34 @@ class Queries {
     } catch (e) {
       print(e);
       return null;
+    }
+  }
+
+  static getMerchantReceiptIds(
+      MySqlConnection conn, int mid, List<int> cidList) async {
+    List<int> totalRidList = <int>[];
+    for (int cid in cidList) {
+      String query = "SELECT * FROM receipt WHERE mid = '" +
+          mid.toString() +
+          "' AND cid = '" +
+          cid.toString() +
+          "'";
+
+      try {
+        List<int> ridList = <int>[];
+
+        var results = await conn.query(query);
+        var iterator = results.iterator;
+        while (iterator.moveNext()) {
+          var result = iterator.current;
+          int rid = result["rid"];
+          ridList.add(rid);
+        } totalRidList = ridList;
+      } catch (e) {
+        print(e);
+        return null;
+      }
+      return totalRidList;
     }
   }
 
