@@ -98,7 +98,13 @@ class Queries {
       await conn.query(uQuery);
 
       // insert customer
-      String cQuery = "insert into customer values (" + nextId + ")";
+      String cQuery = "insert into customer values (" +
+          nextId +
+          ",'" +
+          email+
+          "','"+
+          password+
+          "','')";
       await conn.query(cQuery);
 
       return true;
@@ -328,7 +334,7 @@ class Queries {
       return false;
     }
   }
-
+  //Updates the customer Id column in the receipt table
   static editReceiptCid(MySqlConnection conn, int rId, int cId) async {
     try {
       String query = "update receipt set cid='" +

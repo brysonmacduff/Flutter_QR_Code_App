@@ -1,25 +1,20 @@
-import 'dart:convert';
 import 'dart:ffi';
-
-import 'package:ceg4912_project/Models/customer_receipt_list.dart';
+import 'package:ceg4912_project/Models/user.dart';
 import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/item_page.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Support/utility.dart';
-//import 'package:ceg4912_project/merchant_receipt_page.dart';
+import 'package:ceg4912_project/merchant_receipt_page.dart';
 import 'package:flutter/material.dart';
-import 'package:ceg4912_project/Models/user.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'package:mysql1/mysql1.dart';
 
-class CustomerHomePage extends StatefulWidget {
-  const CustomerHomePage({Key? key}) : super(key: key);
+class CustomerReceiptList extends StatefulWidget {
+  const CustomerReceiptList({Key? key}) : super(key: key);
 
   @override
-  State<CustomerHomePage> createState() => _CustomerHomePageState();
+  State<CustomerReceiptList> createState() => _CustomerReceiptListState();
 }
 
-class _CustomerHomePageState extends State<CustomerHomePage> {
+class _CustomerReceiptListState extends State<CustomerReceiptList> {
   User user = Session.getSessionUser();
 
   // loads the item page
@@ -32,51 +27,34 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     );
   }
 
-/*
   void loadReceiptPage() async {
+    int mId = Session.getSessionUser().getId();
+    var conn = await Queries.getConnection();
+    var mItems = await Queries.getMerchantItems(conn, mId);
+
+    // exit if something went wrong
+    if (mItems == null) {
+      return;
+    }
+
+    // send the merchant's business items to the receipt page
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => const CustomerReceiptPage(),
+        builder: (_) => const MerchantReceiptPage(),
+        settings: RouteSettings(
+          arguments: {"merchantItems": mItems},
+        ),
       ),
     );
 
     // clear the static receipt item list upon returning from the receipt page
-    CustomerReceiptPage.receiptItems.clear();
+    MerchantReceiptPage.receiptItems.clear();
   }
-**/
-
-  Future<void> loadScanReceiptPage() async {
-    //loads scanning page
-    String result = await FlutterBarcodeScanner.scanBarcode(
-        '#ff6666', 'Cancel', true, ScanMode.QR);
-    print("label data: " + result);
-
-    //extracts the receipt Id from the JSON result
-    Map extractID = jsonDecode(result);
-    print(extractID["receiptId"]);
-    int receiptId = int.parse(extractID["receiptId"]);
-    //Assign userId with current customer Id
-    int userId = Session.getSessionUser().getId();
-    //establish connection with database and overwrite receipt customer Id column with with the current customer Id.
-    try{
-      MySqlConnection connection = await Queries.getConnection();
-      bool success = false;
-      Queries.editReceiptCid(connection, receiptId, userId);
-      success = true;
-      print("####################################################### RECEIPT SUCCESS? " + success.toString());
-    }catch(e){
-      print("############################## EXCEPTION ######################################");
-    }
-    showAlertDialog(context);
-
-
-
-  }
-
-  void loadCustomerAccountPage() {}
 
   void loadReceiptHistoryPage() {}
+
+  void loadMerchantAccountPage() {}
 
   void loadSettings() {
     // Does nothing right now. WIP.
@@ -91,41 +69,11 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     Navigator.pop(context);
   }
 
-  //
-  showAlertDialog(BuildContext context) {
-
-    // set up the button
-    Widget okButton = TextButton(
-      child: const Text("OK"),
-      onPressed: () {
-      Navigator.push(
-          context, MaterialPageRoute(
-          builder: (_) => const CustomerReceiptList())); },
-    );
-
-    // set up the AlertDialog
-    AlertDialog alert = AlertDialog(
-      title: const Text("Scan Success"),
-      content: const Text("Receipt Added"),
-      actions: [
-        okButton,
-      ],
-    );
-
-    // show the dialog
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Customer Home Page"),
+        title: const Text("Merchant Home Page"),
         backgroundColor: Utility.getBackGroundColor(),
         actions: <Widget>[
           PopupMenuButton(
@@ -185,7 +133,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                   height: MediaQuery.of(context).size.height / 4.5,
                   color: Utility.getBackGroundColor(),
                   child: TextButton(
-                    onPressed: loadCustomerAccountPage,
+                    onPressed: loadMerchantAccountPage,
                     child: const Text(
                       "Account",
                       style: TextStyle(color: Colors.white),
@@ -198,28 +146,26 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                   height: MediaQuery.of(context).size.height / 4.5,
                   color: Utility.getBackGroundColor(),
                   child: TextButton(
-                    onPressed: loadScanReceiptPage,
+                    onPressed: loadItemPage,
                     child: const Text(
-                      "Scan Receipt",
+                      "Business Items",
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
                 ),
-                /*
                 Container(
                   margin: const EdgeInsets.all(8),
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height / 4.5,
                   color: Utility.getBackGroundColor(),
                   child: TextButton(
-                    onPressed: loadReceiptHistoryPage,
+                    onPressed: loadReceiptPage,
                     child: const Text(
                       "Create Receipt",
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
                 ),
-           **/
                 Container(
                   margin: const EdgeInsets.all(8),
                   width: MediaQuery.of(context).size.width,
