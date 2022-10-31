@@ -64,9 +64,10 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
       bool success = false;
       Queries.editReceiptCid(connection, receiptId, userId);
       success = true;
-      print("####################################################### RECEIPT SUCCESS? " + success.toString());
+      print("############################## RECEIPT SUCCESS? " + success.toString());
     }catch(e){
-      print("############################## EXCEPTION ######################################");
+      print("############################## EXCEPTION : Scan failed");
+
     }
     showAlertDialog(context);
 
