@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:ffi';
 
-import 'package:ceg4912_project/Models/customer_receipt_list.dart';
+import 'package:ceg4912_project/customer_receipt_list.dart';
 import 'package:ceg4912_project/Support/queries.dart';
+import 'package:ceg4912_project/customer_scanned_receipt_page.dart';
 import 'package:ceg4912_project/item_page.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Support/utility.dart';
@@ -20,6 +21,7 @@ class CustomerHomePage extends StatefulWidget {
 }
 
 class _CustomerHomePageState extends State<CustomerHomePage> {
+
   User user = Session.getSessionUser();
 
   // loads the item page
@@ -31,20 +33,6 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
       ),
     );
   }
-
-/*
-  void loadReceiptPage() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const CustomerReceiptPage(),
-      ),
-    );
-
-    // clear the static receipt item list upon returning from the receipt page
-    CustomerReceiptPage.receiptItems.clear();
-  }
-**/
 
   Future<void> loadScanReceiptPage() async {
     //loads scanning page
@@ -65,11 +53,15 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
       Queries.editReceiptCid(connection, receiptId, userId);
       success = true;
       print("############################## RECEIPT SUCCESS? " + success.toString());
-    }catch(e){
+
+    } catch(e){
       print("############################## EXCEPTION : Scan failed");
 
     }
-    showAlertDialog(context);
+    //showAlertDialog(context);
+    Navigator.push(
+        context, MaterialPageRoute(
+        builder: (_) =>  CustomerScannedReceiptPage(receiptID: receiptId)));
 
 
 

@@ -252,6 +252,52 @@ class Queries {
     }
   }
 
+  // gets the business items that pertain to a merchant identified by mId
+  static getCustomerScannedReceiptItems(MySqlConnection conn, int receiptId) async {
+    // String query = "select * from receiptitem where rid = '" + receiptId.toString() + "'";
+    String query = "select * from receiptitem join item on item.iId = receiptitem.iId where rid = '" + receiptId.toString() + "'";
+    // result rows are in JSON format
+    try {
+      List<Item> items = <Item>[];
+      var results = await conn.query(query);
+      var iterator = results.iterator;
+
+      while (iterator.moveNext()) {
+        var result = iterator.current;
+
+        int iId = result["iId"];
+        int mId = result["mId"];
+        String iName = result["iName"];
+        String iCode = result["iCode"];
+        String iDetails = result["iDetails"].toString();
+        String iCategory = result["iCategory"];
+        double iPrice = result["iPrice"];
+        int iTaxable = result["iTaxable"];
+
+        bool taxable = false;
+        // mysql stores booleans as integers but only lets them be 1 or 0.
+        if (iTaxable == 1) {
+          taxable = true;
+        }
+
+        Categories category = Categories.none;
+
+        // this looks redundant now but will be extended as more categories are included
+        if (iCategory == "none") {
+          category = Categories.none;
+        }
+
+        items.add(Item.all(
+            iId, mId, iName, iCode, iDetails, category, iPrice, taxable));
+      }
+
+      return items;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
   // gets the largest primary key id of the item table
   static _getMaxItemId(MySqlConnection conn) async {
     String query = "select max(iId) as maxId from item";
