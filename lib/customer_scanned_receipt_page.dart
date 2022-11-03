@@ -20,13 +20,7 @@ class CustomerScannedReceiptPageState extends State<CustomerScannedReceiptPage> 
   List<Item> receiptItems = List<Item>.empty(growable: true);
   // stores the widgets the represent the customer's receipt items in the UI
   List<Widget> receiptItemWidgets = <Widget>[];
-
-  // // stores the checked business items that will be added to the receipt
-  // List<Item> selectedItems = List<Item>.empty(growable: true);
-
-  // // stores the checked state of each item widget checkbox
-  // List<bool> checkboxValues = List<bool>.empty(growable: true);
-
+  
   // used for alerting the user of errors, warnings, and other events
   String eventMessage = "";
   Color eventMessageColor = Colors.white;
