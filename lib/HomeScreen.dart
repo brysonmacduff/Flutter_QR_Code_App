@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:ceg4912_project/Support/queries.dart';
+import 'package:ceg4912_project/Support/session.dart';
+import 'package:mysql1/mysql1.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -42,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
     var response = await client.post(
       Uri.parse('https://api.stripe.com/v1/customers'),
       headers: headers,
-      body: {'description': 'new customer'},
+      body: {'description': 'new customer', 'name': 'test'},
     );
     if (response.statusCode == 200) {
       return json.decode(response.body);
@@ -116,20 +119,51 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> makePayment() async {
     try {
-      final customer = await createCustomer();
-      paymentIntent = await createPaymentIntent('15', 'CAD');
+      //final customer = await createCustomer();
+      MySqlConnection connection = await Queries.getConnection();
+      int userId = Session.getSessionUser().getId();
+      //Queries.editStripeId(connection, customer['id'], userId);
+      String test = await Queries.getStripeId(connection, userId);
+      var response = await client.get(
+          Uri.parse('https://api.stripe.com/v1/customers/$test'),
+          headers: headers);
+      /*
+      print(json
+          .decode(response.body['invoice_settings']['default_payment_method']));
+          */
+      Map responseMap = jsonDecode(response.body);
+      String pId = responseMap['invoice_settings']['default_payment_method'];
+      /*
+      final paymentMethod = await createPaymentMethod(
+          number: '4242424242424242',
+          expMonth: '03',
+          expYear: '23',
+          cvc: '123');
+      await attachPaymentMethod(paymentMethod['id'], customer['id']);
+      await updateCustomer(paymentMethod['id'], customer['id']);
+      */
+
+      paymentIntent = await createPaymentIntent('15', 'CAD', pId, test);
+      //Map paymentIntentMap = jsonDecode(paymentIntent);
+
+      String pI = paymentIntent!['client_secret'];
+      Map pmo = paymentIntent!['payment_method_options'];
+      Stripe.instance.confirmPayment(pI, params, pmo);
+
       //Payment Sheet
+      /*
       await Stripe.instance
           .initPaymentSheet(
               paymentSheetParameters: SetupPaymentSheetParameters(
                   paymentIntentClientSecret: paymentIntent!['client_secret'],
-                  customerId: customer['id'],
+                  customerId: test,
                   style: ThemeMode.dark,
                   merchantDisplayName: 'Merchant'))
           .then((value) {});
 
       ///now finally display payment sheeet
       displayPaymentSheet();
+      */
     } catch (e, s) {
       print('exception:$e$s');
     }
@@ -175,15 +209,18 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   //  Future<Map<String, dynamic>>
-  createPaymentIntent(String amount, String currency) async {
+  createPaymentIntent(
+      String amount, String currency, String pId, String cId) async {
     try {
       Map<String, dynamic> body = {
         'amount': calculateAmount(amount),
         'currency': currency,
-        'payment_method_types[]': 'card'
+        'payment_method': pId,
+        'customer': cId,
+        'automatic_payment_methods[enabled]': 'true',
       };
 
-      var response = await http.post(
+      var response = await client.post(
         Uri.parse('https://api.stripe.com/v1/payment_intents'),
         headers: {
           'Authorization':
@@ -204,5 +241,13 @@ class _HomeScreenState extends State<HomeScreen> {
   calculateAmount(String amount) {
     final calculatedAmout = (int.parse(amount)) * 100;
     return calculatedAmout.toString();
+  }
+
+  Future<void> subscriptions() async {
+    final customer = await createCustomer();
+    final paymentMethod = await createPaymentMethod(
+        number: '4242424242424242', expMonth: '03', expYear: '23', cvc: '123');
+    await attachPaymentMethod(paymentMethod['id'], customer['id']);
+    await updateCustomer(paymentMethod['id'], customer['id']);
   }
 }

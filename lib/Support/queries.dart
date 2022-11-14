@@ -74,6 +74,39 @@ class Queries {
     return await conn.query(query);
   }
 
+  static editStripeId(MySqlConnection conn, String sId, int cId) async {
+    try {
+      String query = "update customer set cStripe_Id='" +
+          sId +
+          "'"
+              " where cId='" +
+          cId.toString() +
+          "';";
+
+      await conn.query(query);
+      return true;
+    } catch (e) {
+      print("editStripeId(): " + e.toString());
+      return false;
+    }
+  }
+
+  static getStripeId(MySqlConnection conn, int cId) async {
+    String query =
+        "select cStripe_Id from customer where cId='" + cId.toString() + "'";
+    try {
+      List<Item> items = <Item>[];
+      var results = await conn.query(query);
+      var iterator = results.iterator;
+      while (iterator.moveNext()) {
+        var result = iterator.current;
+        return result["cStripe_Id"];
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
   // inserts a new customer to the database
   static insertCustomer(
     MySqlConnection conn,

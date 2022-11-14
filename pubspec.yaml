@@ -45,7 +45,6 @@ dependencies:
   cupertino_icons: ^1.0.2
   http:
   url_launcher_web: ^2.0.13
-  stripe: ^4.7.0
   flutter_stripe: ^4.0.0
   
 
