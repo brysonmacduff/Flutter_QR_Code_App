@@ -76,8 +76,6 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     showAlertDialog(context);
   }
 
-  void loadCustomerAccountPage() {}
-
   void loadReceiptHistoryPage() {
     Navigator.push(
       context,
@@ -185,19 +183,6 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
             child: ListView(
               padding: const EdgeInsets.all(8),
               children: [
-                Container(
-                  margin: const EdgeInsets.all(8),
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 4.5,
-                  color: Utility.getBackGroundColor(),
-                  child: TextButton(
-                    onPressed: loadCustomerAccountPage,
-                    child: const Text(
-                      "Account",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
                 Container(
                   margin: const EdgeInsets.all(8),
                   width: MediaQuery.of(context).size.width,
