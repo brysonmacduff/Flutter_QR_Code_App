@@ -127,12 +127,26 @@ class _HomeScreenState extends State<HomeScreen> {
       var response = await client.get(
           Uri.parse('https://api.stripe.com/v1/customers/$test'),
           headers: headers);
-      /*
-      print(json
-          .decode(response.body['invoice_settings']['default_payment_method']));
-          */
+
       Map responseMap = jsonDecode(response.body);
       String pId = responseMap['invoice_settings']['default_payment_method'];
+
+      Map<String, dynamic> body = {
+        'payment_method': pId,
+        'setup_future_usage': 'off_session',
+      };
+
+      //make payment intent
+      paymentIntent = await createPaymentIntent('15', 'CAD', pId, test);
+
+      var pi = paymentIntent!['id'];
+      //confirm payment intent
+      var response2 = await client.post(
+          Uri.parse('https://api.stripe.com/v1/payment_intents/$pi/confirm'),
+          headers: headers,
+          body: body);
+
+      print('Payment intent confirm->>> ${response2.body.toString()}');
       /*
       final paymentMethod = await createPaymentMethod(
           number: '4242424242424242',
@@ -142,16 +156,11 @@ class _HomeScreenState extends State<HomeScreen> {
       await attachPaymentMethod(paymentMethod['id'], customer['id']);
       await updateCustomer(paymentMethod['id'], customer['id']);
       */
-
-      paymentIntent = await createPaymentIntent('15', 'CAD', pId, test);
+      //paymentIntent = await createPaymentIntent('15', 'CAD', pId, test);
       //Map paymentIntentMap = jsonDecode(paymentIntent);
 
-      String pI = paymentIntent!['client_secret'];
-      Map pmo = paymentIntent!['payment_method_options'];
-      Stripe.instance.confirmPayment(pI, params, pmo);
-
       //Payment Sheet
-      /*
+/*
       await Stripe.instance
           .initPaymentSheet(
               paymentSheetParameters: SetupPaymentSheetParameters(
@@ -217,7 +226,8 @@ class _HomeScreenState extends State<HomeScreen> {
         'currency': currency,
         'payment_method': pId,
         'customer': cId,
-        'automatic_payment_methods[enabled]': 'true',
+        'setup_future_usage': 'off_session',
+        'payment_method_types[]': 'card',
       };
 
       var response = await client.post(
