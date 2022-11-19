@@ -537,13 +537,119 @@ class Queries {
           var result = iterator.current;
           int rid = result["rid"];
           ridList.add(rid);
-        } totalRidList = ridList;
+        }
+        totalRidList = ridList;
       } catch (e) {
         print(e);
         return null;
       }
       return totalRidList;
     }
+  }
+
+  static getReceiptItemIds(MySqlConnection conn, int rid) async {
+    List<int> receiptItemIdList = <int>[];
+    try {
+      String query =
+          "SELECT riid FROM receiptitem WHERE rid = '" + rid.toString() + "'";
+
+      var results = (await conn.query(query));
+      var iterator = results.iterator;
+
+      while (iterator.moveNext()) {
+        var current = iterator.current;
+        receiptItemIdList.add(current["riid"]);
+      }
+      return receiptItemIdList;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static getItemByReceiptId(MySqlConnection conn, int riid) async {
+    String query = "select distinct * from item as i JOIN receiptItem as j ON riid where riid = '" +
+        riid.toString() +
+        "' and i.iId = j.iId";
+    var item;
+    // result rows are in JSON format
+    try {
+      var results = await conn.query(query);
+      var iterator = results.iterator;
+
+      while (iterator.moveNext()) {
+        var result = iterator.current;
+
+        int itemId = result["iId"];
+        int mid = result["mId"];
+        String itemName = result["iName"].toString();
+        String itemCode = result["iCode"].toString();
+        String itemDetails = result["iDetails"].toString();
+        String itemCategory = result["iCategory"];
+        double itemPrice = result["iPrice"];
+        int itemTaxable = result["iTaxable"];
+
+        bool taxable = false;
+        // mysql stores booleans as integers but only lets them be 1 or 0.
+        if (itemTaxable == 1) {
+          taxable = true;
+        }
+
+        Categories category = Categories.none;
+
+        // this looks redundant now but will be extended as more categories are included
+        if (itemCategory == "none") {
+          category = Categories.none;
+        }
+
+        item = Item.all(itemId, mid, itemName, itemCode, itemDetails, category, itemPrice, taxable);
+
+        //for (Item i in items) {
+          //receiptItems.add(ReceiptItem.create(i));
+        //};
+      }
+      return item;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  static getReceiptDateTime(MySqlConnection conn, int rid) async {
+    String query = "select rDateTime from receipt where rid =" + rid.toString();
+    var results = await conn.query(query);
+    var iterator = results.iterator;
+
+    while (iterator.moveNext()) {
+      var result = iterator.current;
+      return result["rDateTime"];
+    }
+    return null;
+  }
+
+  static getReceiptCost(MySqlConnection conn, int rid) async {
+    String query = "select rCost from receipt where rid =" + rid.toString();
+    var results = await conn.query(query);
+    var iterator = results.iterator;
+
+    while (iterator.moveNext()) {
+      var result = iterator.current;
+      double cost = double.parse(result["rCost"]);
+      return cost;
+    }
+    return null;
+  }
+
+  static getReceiptCid(MySqlConnection conn, int rid) async {
+    String query = "select cid from receipt where rid =" + rid.toString();
+    var results = await conn.query(query);
+    var iterator = results.iterator;
+
+    while (iterator.moveNext()) {
+      var result = iterator.current;
+      String cid = result["cid"].toString();
+      return cid;
+    }
+    return null;
   }
 
   static getMaxReceiptId(MySqlConnection conn) async {

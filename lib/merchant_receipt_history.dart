@@ -4,6 +4,9 @@ import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/merchant_filter.dart';
 import 'package:flutter/material.dart';
 
+import 'Models/item.dart';
+import 'Models/receipt_item.dart';
+
 var merchantName = "Amazon";
 
 class MerchantReceiptHistoryPageRoute extends StatelessWidget {
@@ -98,7 +101,6 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
   // keeps track of which receipt widgets are expanded in the UI
   List<bool> receiptExpandedStateSet = <bool>[];
   //Stores all customers
-  List<String> customerEmails = <String>[];
   List<int> customerIds = <int>[];
 
   // the color of event messages that are displayed to the user
@@ -120,16 +122,84 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
         builder: (_) => const MerchantFilter(),
       ),
     );
-    print(result);
+    customerIds = result;
   }
 
   // generates widgets for all of the current merchant's business receipt
   void _getReceipts() async {
     int mId = Session.getSessionUser().getId();
     // hardcoded cid for now
-    int cId = 1;
+
     var conn = await Queries.getConnection();
-    var mReceipts = await Queries.getMerchantReceipts(conn, mId, cId);
+    //var mReceipts = await Queries.getMerchantReceipts(conn, mId, 1);
+    var mReceipts = [];
+
+    //Get list of receipt ids
+    var receiptIds = await Queries.getMerchantReceiptIds(conn, mId, customerIds);
+
+    //Loops through receipt Ids
+    for(int receiptId in receiptIds) {
+      //Get list of receipt ids for current id
+
+      var receiptItemIds = await Queries.getReceiptItemIds(conn, receiptId);
+      print("ReceiptItemIDs");
+      print(receiptItemIds);
+      if (receiptItemIds == null) {
+        setState(() {
+          eventMessage = "Receipt Retrieval Failed: Receipt has no receipt items.";
+          eventMessageColor = Colors.red;
+        });
+        // clears the event message after 2 seconds have passed
+        clearEventMessage(2000);
+        return;
+      }
+      //Add receipt item ids to the list
+      var receipt_master = [];
+      for(int receiptItemId in receiptItemIds) {
+        receipt_master.add(receiptItemId);
+      }
+
+      var itemTest = await Queries.getItemByReceiptId(conn, 28);
+      //print("printing item");
+      //print(itemTest);
+
+
+      var itemList = [];
+      //Go through receipt items, per receipt, create each item, save in list
+      for(int receiptItemId in receipt_master){
+         var item = await Queries.getItemByReceiptId(conn, receiptItemId);
+         print("legit item:");
+         print(item);
+
+         if (item == null) {
+           setState(() {
+             eventMessage = "Receipt Retrieval Failed: Receipt has no receipt items.";
+             eventMessageColor = Colors.red;
+           });
+           // clears the event message after 2 seconds have passed
+           clearEventMessage(2000);
+           return;
+         }
+         itemList.add(item);
+      }
+
+      //print("test");
+      //print(itemList);
+      //create receipt items
+      var receiptItems = <ReceiptItem>[];
+      for(Item item in itemList) {
+        receiptItems.add(ReceiptItem.create(item));
+      }
+
+      //get dateTime, Cost, mid, cid
+      DateTime dateTime = await Queries.getReceiptDateTime(conn, receiptId);
+      var cost = await Queries.getReceiptCost(conn, receiptId);
+      var cid = await Queries.getReceiptCid(conn, receiptId);
+      int cidparam = int.parse(cid);
+
+      //create the receipt with the current receipt id
+      mReceipts.add(Receipt.all(receiptId, dateTime, cost, mId, cidparam, receiptItems));
+    }
 
     // if the query went wrong then it would return null
     if (mReceipts == null) {
