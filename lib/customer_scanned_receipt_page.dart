@@ -7,9 +7,9 @@ import 'package:ceg4912_project/Models/item.dart';
 import 'package:ceg4912_project/Models/receipt_item.dart';
 
 class CustomerScannedReceiptPage extends StatefulWidget {
-  int receiptID;
+  final int receiptID;
 
-  CustomerScannedReceiptPage({Key? key,required this.receiptID}) : super(key: key);
+  const CustomerScannedReceiptPage({Key? key,required this.receiptID}) : super(key: key);
 
   @override
   State<CustomerScannedReceiptPage> createState() => CustomerScannedReceiptPageState(receiptID);
@@ -20,7 +20,7 @@ class CustomerScannedReceiptPageState extends State<CustomerScannedReceiptPage> 
   List<Item> receiptItems = List<Item>.empty(growable: true);
   // stores the widgets the represent the customer's receipt items in the UI
   List<Widget> receiptItemWidgets = <Widget>[];
-  
+
   // used for alerting the user of errors, warnings, and other events
   String eventMessage = "";
   Color eventMessageColor = Colors.white;

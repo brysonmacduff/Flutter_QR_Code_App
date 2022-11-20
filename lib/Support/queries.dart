@@ -492,4 +492,32 @@ class Queries {
       return false;
     }
   }
+
+  static getCustomerReceipts(MySqlConnection conn, int cId) async {
+    String query = "select * from receipt where cid = '" + cId.toString() + "'";
+
+    // result rows are in JSON format
+    try {
+      List<Receipt> receipts = <Receipt>[];
+      var results = await conn.query(query);
+      var iterator = results.iterator;
+
+      while (iterator.moveNext()) {
+        var result = iterator.current;
+
+        int rId = result["rid"];
+        DateTime dateTime = result["rDateTime"];
+        double cost = double.parse(result["rCost"]);
+        int mId = result["mid"];
+        int cId = result["cid"];
+
+        receipts.add(Receipt.no_items(rId, dateTime, cost, mId, cId));
+      }
+
+      return receipts;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
 }

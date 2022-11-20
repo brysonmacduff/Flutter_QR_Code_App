@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:ffi';
 
-import 'package:ceg4912_project/customer_receipt_list.dart';
 import 'package:ceg4912_project/Support/queries.dart';
+import 'package:ceg4912_project/customer_receipt_history_page.dart';
 import 'package:ceg4912_project/customer_scanned_receipt_page.dart';
 import 'package:ceg4912_project/item_page.dart';
 import 'package:ceg4912_project/Support/session.dart';
@@ -62,14 +62,15 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     Navigator.push(
         context, MaterialPageRoute(
         builder: (_) =>  CustomerScannedReceiptPage(receiptID: receiptId)));
-
-
-
   }
 
   void loadCustomerAccountPage() {}
 
-  void loadReceiptHistoryPage() {}
+  void loadReceiptHistoryPage() {
+    Navigator.push(
+        context, MaterialPageRoute(
+        builder: (_) => CustomerReceiptHistoryPageRoute()));
+  }
 
   void loadSettings() {
     // Does nothing right now. WIP.
@@ -85,34 +86,34 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   }
 
   //
-  showAlertDialog(BuildContext context) {
-
-    // set up the button
-    Widget okButton = TextButton(
-      child: const Text("OK"),
-      onPressed: () {
-      Navigator.push(
-          context, MaterialPageRoute(
-          builder: (_) => const CustomerReceiptList())); },
-    );
-
-    // set up the AlertDialog
-    AlertDialog alert = AlertDialog(
-      title: const Text("Scan Success"),
-      content: const Text("Receipt Added"),
-      actions: [
-        okButton,
-      ],
-    );
-
-    // show the dialog
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
-  }
+  // showAlertDialog(BuildContext context) {
+  //
+  //   // set up the button
+  //   Widget okButton = TextButton(
+  //     child: const Text("OK"),
+  //     onPressed: () {
+  //     Navigator.push(
+  //         context, MaterialPageRoute(
+  //         builder: (_) => const CustomerScannedReceiptPage())); },
+  //   );
+  //
+  //   // set up the AlertDialog
+  //   AlertDialog alert = AlertDialog(
+  //     title: const Text("Scan Success"),
+  //     content: const Text("Receipt Added"),
+  //     actions: [
+  //       okButton,
+  //     ],
+  //   );
+  //
+  //   // show the dialog
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return alert;
+  //     },
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -198,21 +199,6 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                     ),
                   ),
                 ),
-                /*
-                Container(
-                  margin: const EdgeInsets.all(8),
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 4.5,
-                  color: Utility.getBackGroundColor(),
-                  child: TextButton(
-                    onPressed: loadReceiptHistoryPage,
-                    child: const Text(
-                      "Create Receipt",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-           **/
                 Container(
                   margin: const EdgeInsets.all(8),
                   width: MediaQuery.of(context).size.width,
