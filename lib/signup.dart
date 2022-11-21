@@ -1,12 +1,18 @@
 //import 'dart:html';
 
 import 'dart:async';
+import 'dart:convert';
 
+
+import 'package:ceg4912_project/customer_payment.dart';
 import 'package:flutter/material.dart';
 import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/Models/user.dart';
 import 'package:flutter/services.dart';
 import 'package:date_field/date_field.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:mysql1/mysql1.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -16,6 +22,16 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  //some stripe variables
+  Map<String, dynamic>? paymentIntent;
+  final client = http.Client();
+  static Map<String, String> headers = {
+    'Authorization':
+    'Bearer sk_test_51LTCRODkzVSkvB16MkkVIZ1UZl5ewJzmaB9Qgm9yQrE8jTWX8UjrM1L8cu4ty6BI2SSyLKgvxqXGK1UVANlUQyc500J8r4XRY1',
+    'Content-Type': 'application/x-www-form-urlencoded'
+  };
+
+  int cId=-1;
   // basic information
   String email = "";
   String password1 = "";
@@ -50,6 +66,97 @@ class _SignUpPageState extends State<SignUpPage> {
   DateTime merchantBirthDate =
       DateTime.now(); // temporary. This will become a DateTime object
 
+
+  void makeInitialPayment(MySqlConnection conn, int cId) async{
+    try { //fetch the new customer's SQL Id
+
+      await CustomerPayment.createCustomer(client, conn, cId,email);
+
+      String cStripeId = await Queries.getStripeId(conn, cId);
+      var response1 = await client.get(
+          Uri.parse('https://api.stripe.com/v1/customers/$cStripeId'),
+          headers: headers);
+
+      Map responseMap = jsonDecode(response1.body);
+      print(responseMap.toString());
+      String pId = responseMap['invoice_settings']['default_payment_method'];
+
+      Map<String, dynamic> body = {
+        'payment_method': pId,
+        'setup_future_usage': 'off_session',
+      };
+      //Create a Payment Intent
+      paymentIntent = await CustomerPayment.createPaymentIntent(
+          client, '1', 'CAD', pId, cStripeId);
+      print("This is the Payment Intent Object: " + paymentIntent.toString());
+
+      //Payment Sheet
+      await Stripe.instance.initPaymentSheet(
+          paymentSheetParameters: SetupPaymentSheetParameters(
+              paymentIntentClientSecret: paymentIntent!['client_secret'],
+              customerId: cStripeId,
+              style: ThemeMode.system,
+              merchantDisplayName: 'Merchant'))
+          .then((value) {});
+
+      //now finally display payment sheet
+      displayPaymentSheet();
+
+      //Confirm the Payment
+      var pi = paymentIntent!['id'];
+      //confirm payment intent
+      var response2 = await client.post(
+          Uri.parse('https://api.stripe.com/v1/payment_intents/$pi/confirm'),
+          headers: headers,
+          body: body);
+      print('Payment intent confirm->>> ${response2.body.toString()}');
+    }catch(e,s){
+      print('Exception: $e$s');
+    }
+  }
+
+  void displayPaymentSheet() async {
+    try {
+      await Stripe.instance.presentPaymentSheet().then((value) {
+        showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: const [
+                      Icon(
+                        Icons.check_circle,
+                        color: Colors.green,
+                      ),
+                      Text("Payment Successfull"),
+                    ],
+                  ),
+                ],
+              ),
+            ));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("paid successfully")));
+
+        paymentIntent = null;
+      }).onError((error, stackTrace) {
+        print('Error is:--->$error $stackTrace');
+      });
+    } on StripeException catch (e) {
+      print('Error is:---> $e');
+      showDialog(
+          context: context,
+          builder: (_) => const AlertDialog(
+            content: Text("Cancelled "),
+          ));
+    } catch (e) {
+      print('$e');
+    }
+  }
+
+
+
+
   void signUp() async {
     // passwords must match
     if (!isPasswordValid(password1, password2) || !isEmailValid(email)) {
@@ -64,7 +171,12 @@ class _SignUpPageState extends State<SignUpPage> {
     // create new user in database
     if (role == Roles.customer) {
       var conn = await Queries.getConnection();
+
+      // insert a new customer into the SQL table
       result = await Queries.insertCustomer(conn, email, password1);
+      cId= await Queries.getCustomerId(conn, email);
+      //makes initial payment intent and displays payment sheet
+      makeInitialPayment(conn,cId);
 
       //print("customer creation successful? = " + result.toString());
     } else if (role == Roles.merchant) {
