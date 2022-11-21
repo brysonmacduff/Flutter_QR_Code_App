@@ -10,7 +10,25 @@ class Receipt {
 
   Receipt.empty();
 
-  Receipt.all(int id, DateTime dateTime, double cost, int mid, int cid, List<ReceiptItem> receiptItems) {
+  Receipt() {
+    _id = -1;
+    _dateTime = DateTime.now();
+    _cost = 0.00;
+    _mid = -1;
+    _cid = -1;
+    _receiptItems = [];
+  }
+  //Blockchain Initializer;
+  Receipt.BCParams(int id, DateTime dateTime, double cost, int mid, int cid) {
+    _id = id;
+    _dateTime = dateTime;
+    _cost = cost;
+    _mid = mid;
+    _cid = cid;
+  }
+
+  Receipt.all(int id, DateTime dateTime, double cost, int mid, int cid,
+      List<ReceiptItem> receiptItems) {
     _id = id;
     _dateTime = dateTime;
     _cost = cost;

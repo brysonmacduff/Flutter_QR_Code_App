@@ -1,6 +1,7 @@
 // dependencies
 //import 'dart:html';
 
+import 'package:ceg4912_project/BlockchainUpperTest.dart';
 import 'package:ceg4912_project/Support/utility.dart';
 import 'package:ceg4912_project/merchant_home.dart';
 import 'package:ceg4912_project/customer_home.dart';
@@ -18,6 +19,12 @@ import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Models/user.dart';
 
 //import 'item_page.dart';
+
+//TEST REMOVE LATER
+import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
+import 'package:ceg4912_project/Models/ReceiptSystemModel.dart';
+import 'BlockchainTestPage.dart';
 
 class LogInPageRoute extends StatelessWidget {
   const LogInPageRoute({Key? key}) : super(key: key);
@@ -106,6 +113,14 @@ class _LogInPageState extends State<LogInPage> {
     );
   }
 
+  void loadBlockchainTestPage() {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => BTest(),
+        ));
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -153,6 +168,20 @@ class _LogInPageState extends State<LogInPage> {
                   onPressed: loadSignUpPage,
                   child: const Text(
                     "Sign Up",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Container(
+                color: Utility.getBackGroundColor(),
+                width: MediaQuery.of(context).size.width / 3,
+                child: TextButton(
+                  onPressed: loadBlockchainTestPage,
+                  child: const Text(
+                    "Test",
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
