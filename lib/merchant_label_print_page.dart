@@ -24,20 +24,14 @@ class _MerchantLabelPrintPageState extends State<MerchantLabelPrintPage> {
   Item _item = Item.empty();
 
   void printLabel() async {
-    // get application document directory
-    Directory appDocDir = await getTemporaryDirectory();
-
     // create an svg barcode image
     final bc = Barcode.code128();
     final svg =
-        bc.toSvg(_item.toLabelJSON(), width: 200, height: 200, fontHeight: 0);
+        bc.toSvg(_item.toLabelJSON(), width: 10, height: 10, fontHeight: 0);
 
     final doc = pw.Document();
     doc.addPage(pw.Page(build: (pw.Context context) {
-      return pw.Center(
-          child:
-              pw.SvgImage(svg: svg) //pw.Image.memory(imageBytes)//pw.Image(ip),
-          );
+      return pw.Center(child: pw.SvgImage(svg: svg));
     }));
 
     // initiate the print job
