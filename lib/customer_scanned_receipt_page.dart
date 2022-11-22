@@ -111,7 +111,15 @@ class CustomerScannedReceiptPageState extends State<CustomerScannedReceiptPage> 
             Padding(
               padding: const EdgeInsets.all(8),
               child: Text(
-                "${receiptItems[itemIndex].getName()} Quantity: ${ItemsQuantity[itemIndex]}" ,
+                receiptItems[itemIndex].getName() ,
+                style: const TextStyle(color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                "Quantity:  ${ItemsQuantity[itemIndex]}" ,
                 style: const TextStyle(color: Colors.white),
                 overflow: TextOverflow.ellipsis,
               ),

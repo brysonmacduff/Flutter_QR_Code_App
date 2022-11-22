@@ -9,7 +9,6 @@ import 'package:ceg4912_project/item_page.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Support/utility.dart';
 import 'package:ceg4912_project/login.dart';
-//import 'package:ceg4912_project/merchant_receipt_page.dart';
 import 'package:flutter/material.dart';
 import 'package:ceg4912_project/Models/user.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -76,6 +75,16 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
           body: body);
 
       print('Payment intent confirm->>> ${response2.body.toString()}');
+      //establish connection with database and overwrite receipt customer Id column with with the current customer Id.
+      try {
+        MySqlConnection connection = await Queries.getConnection();
+        bool success = false;
+        Queries.editReceiptCid(connection, receiptId, userId);
+        success = true;
+        print("############################## RECEIPT SUCCESS? $success");
+      } catch (e) {
+        print("############################## EXCEPTION : Scan failed");
+      }
       Navigator.push(
           context, MaterialPageRoute(
           builder: (_) => CustomerScannedReceiptPage(receiptID: receiptId)));
@@ -107,17 +116,6 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     catch (e) {
       print("PAYMENT FAILED ==> makePayment() threw Exception");
     }
-    //establish connection with database and overwrite receipt customer Id column with with the current customer Id.
-    try {
-      MySqlConnection connection = await Queries.getConnection();
-      bool success = false;
-      Queries.editReceiptCid(connection, receiptId, userId);
-      success = true;
-      print("############################## RECEIPT SUCCESS? $success");
-    } catch (e) {
-      print("############################## EXCEPTION : Scan failed");
-    }
-
   }
 
   void loadCustomerAccountPage() {}
@@ -149,7 +147,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
       style: TextButton.styleFrom(backgroundColor: Colors.greenAccent,
           textStyle: const TextStyle(color: Colors.black)),
       onPressed: () async {
-        await makePayment(receiptId);
+        makePayment(receiptId);
       },
       child: const Text("Pay"),
     );
@@ -157,7 +155,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     Widget cancelButton = TextButton(
       child: const Text("Cancel"),
       onPressed: () {
-        Navigator.pop(context);
+        Navigator.of(context).pop(context);
       },
     );
 
@@ -241,25 +239,6 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
             child: ListView(
               padding: const EdgeInsets.all(8),
               children: [
-                Container(
-                  margin: const EdgeInsets.all(8),
-                  width: MediaQuery
-                      .of(context)
-                      .size
-                      .width,
-                  height: MediaQuery
-                      .of(context)
-                      .size
-                      .height / 4.5,
-                  color: Utility.getBackGroundColor(),
-                  child: TextButton(
-                    onPressed: loadCustomerAccountPage,
-                    child: const Text(
-                      "Account",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
                 Container(
                   margin: const EdgeInsets.all(8),
                   width: MediaQuery
