@@ -70,15 +70,20 @@ class _SignUpPageState extends State<SignUpPage> {
   void makeInitialPayment(MySqlConnection conn, int cId) async{
     try { //fetch the new customer's SQL Id
 
+      //Creates the Stripe Customer Object
       await CustomerPayment.createCustomer(client, conn, cId,email);
 
+      //Retrieve the customer's stripe ID
       String cStripeId = await Queries.getStripeId(conn, cId);
+
+      //Stripe API Call to access Customer Object
       var response1 = await client.get(
           Uri.parse('https://api.stripe.com/v1/customers/$cStripeId'),
           headers: headers);
-
       Map responseMap = jsonDecode(response1.body);
       print(responseMap.toString());
+
+      //Extracts the Payment Method Id from the API Response
       String pId = responseMap['invoice_settings']['default_payment_method'];
 
       Map<String, dynamic> body = {
@@ -90,7 +95,7 @@ class _SignUpPageState extends State<SignUpPage> {
           client, '1', 'CAD', pId, cStripeId);
       print("This is the Payment Intent Object: " + paymentIntent.toString());
 
-      //Payment Sheet
+      //Initialize Payment Sheet
       await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
               paymentIntentClientSecret: paymentIntent!['client_secret'],
@@ -102,9 +107,9 @@ class _SignUpPageState extends State<SignUpPage> {
       //now finally display payment sheet
       displayPaymentSheet();
 
-      //Confirm the Payment
+      //Confirm the Payment Intent
       var pi = paymentIntent!['id'];
-      //confirm payment intent
+      //Stripe API call
       var response2 = await client.post(
           Uri.parse('https://api.stripe.com/v1/payment_intents/$pi/confirm'),
           headers: headers,
@@ -115,6 +120,7 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
+  //Displays the stripe Credit Card Payment Sheet
   void displayPaymentSheet() async {
     try {
       await Stripe.instance.presentPaymentSheet().then((value) {
@@ -154,9 +160,7 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
-
-
-
+  //Handles Customer/Merchant Sign-up procedure
   void signUp() async {
     // passwords must match
     if (!isPasswordValid(password1, password2) || !isEmailValid(email)) {
@@ -174,7 +178,10 @@ class _SignUpPageState extends State<SignUpPage> {
 
       // insert a new customer into the SQL table
       result = await Queries.insertCustomer(conn, email, password1);
+
+      //get Customer SQL ID
       cId= await Queries.getCustomerId(conn, email);
+
       //makes initial payment intent and displays payment sheet
       makeInitialPayment(conn,cId);
 

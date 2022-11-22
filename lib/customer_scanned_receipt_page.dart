@@ -35,6 +35,7 @@ class CustomerScannedReceiptPageState extends State<CustomerScannedReceiptPage> 
     getReceiptItems();
   }
 
+  //fetches the receipt items from the item table and adds them to receiptItems
   void getReceiptItems() async {
     int cId = Session.getSessionUser().getId();
     var conn = await Queries.getConnection();

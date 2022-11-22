@@ -69,7 +69,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   void loadReceiptHistoryPage() {
     Navigator.push(
         context, MaterialPageRoute(
-        builder: (_) => CustomerReceiptHistoryPageRoute()));
+        builder: (_) => const CustomerReceiptHistoryPageRoute()));
   }
 
   void loadSettings() {
