@@ -141,7 +141,8 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   }
 
 
-  showAlertDialog(BuildContext context) {
+  showAlertDialog(BuildContext context) async {
+    MySqlConnection connection = await Queries.getConnection();
     // set up the button
     Widget yesButton = TextButton(
       style: TextButton.styleFrom(backgroundColor: Colors.greenAccent,
@@ -162,7 +163,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
       title: const Text("Checkout"),
-      content: const Text("Proceed with payment?"),
+      content:  Text("Proceed with payment?\n\nTotal:  \$" + double.parse(await Queries.getReceiptAmount(connection, receiptId)).toStringAsFixed(0)),
       actions: [
         yesButton,
         cancelButton,
