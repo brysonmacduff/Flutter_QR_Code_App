@@ -58,7 +58,7 @@ class CustomerPayment{
   }
 
   static Future<Map<String, dynamic>> createPaymentMethod(http.Client client,
-      {required String number,
+        {required String number,
         required String expMonth,
         required String expYear,
         required String cvc}) async {
@@ -163,7 +163,7 @@ class CustomerPayment{
   //                       Icons.check_circle,
   //                       color: Colors.green,
   //                     ),
-  //                     Text("Payment Successfull"),
+  //                     Text("Payment Successful"),
   //                   ],
   //                 ),
   //               ],

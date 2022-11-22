@@ -2,16 +2,20 @@ import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:ceg4912_project/Support/queries.dart';
+import 'package:ceg4912_project/customer_payment.dart';
 import 'package:ceg4912_project/customer_receipt_history_page.dart';
 import 'package:ceg4912_project/customer_scanned_receipt_page.dart';
 import 'package:ceg4912_project/item_page.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Support/utility.dart';
+import 'package:ceg4912_project/login.dart';
 //import 'package:ceg4912_project/merchant_receipt_page.dart';
 import 'package:flutter/material.dart';
 import 'package:ceg4912_project/Models/user.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:mysql1/mysql1.dart';
+import 'package:http/http.dart' as http;
+
 
 class CustomerHomePage extends StatefulWidget {
   const CustomerHomePage({Key? key}) : super(key: key);
@@ -21,7 +25,14 @@ class CustomerHomePage extends StatefulWidget {
 }
 
 class _CustomerHomePageState extends State<CustomerHomePage> {
-
+  int receiptId=-1;
+  Map<String, dynamic>? paymentIntent;
+  final client = http.Client();
+  static Map<String, String> headers = {
+    'Authorization':
+    'Bearer sk_test_51LTCRODkzVSkvB16MkkVIZ1UZl5ewJzmaB9Qgm9yQrE8jTWX8UjrM1L8cu4ty6BI2SSyLKgvxqXGK1UVANlUQyc500J8r4XRY1',
+    'Content-Type': 'application/x-www-form-urlencoded'
+  };
   User user = Session.getSessionUser();
 
   // loads the item page
@@ -34,6 +45,46 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     );
   }
 
+  makePayment(int receiptId) async {
+    try {
+      //final customer = await createCustomer();
+      MySqlConnection connection = await Queries.getConnection();
+      int userId = Session.getSessionUser().getId();
+      //Queries.editStripeId(connection, customer['id'], userId);
+      String cStripId = await Queries.getStripeId(connection, userId);
+      var response = await client.get(
+          Uri.parse('https://api.stripe.com/v1/customers/$cStripId'),
+          headers: headers);
+
+      Map responseMap = jsonDecode(response.body);
+      String pId = responseMap['invoice_settings']['default_payment_method'];
+
+      Map<String, dynamic> body = {
+        'payment_method': pId,
+        'setup_future_usage': 'off_session',
+      };
+
+      var paymentAmount =
+      //make payment intent
+      paymentIntent = await CustomerPayment.createPaymentIntent(client,double.parse(await Queries.getReceiptAmount(connection, receiptId)).toStringAsFixed(0), 'CAD', pId, cStripId);
+
+      var pi = paymentIntent!['id'];
+      //confirm payment intent
+      var response2 = await client.post(
+          Uri.parse('https://api.stripe.com/v1/payment_intents/$pi/confirm'),
+          headers: headers,
+          body: body);
+
+      print('Payment intent confirm->>> ${response2.body.toString()}');
+      Navigator.push(
+          context, MaterialPageRoute(
+          builder: (_) => CustomerScannedReceiptPage(receiptID: receiptId)));
+    } catch (e, s) {
+      print('exception:$e$s');
+    }
+  }
+
+
   Future<void> loadScanReceiptPage() async {
     //loads scanning page
     String result = await FlutterBarcodeScanner.scanBarcode(
@@ -43,25 +94,30 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     //extracts the receipt Id from the JSON result
     Map extractID = jsonDecode(result);
     print(extractID["receiptId"]);
-    int receiptId = int.parse(extractID["receiptId"]);
+    receiptId = int.parse(extractID["receiptId"]);
+
     //Assign userId with current customer Id
     int userId = Session.getSessionUser().getId();
+
+    //Continue to Payment using stored Stripe Customer's Payment Method
+    try {
+      //show an alert dialog box to confirm proceed with payment
+      showAlertDialog(context);
+    }
+    catch (e) {
+      print("PAYMENT FAILED ==> makePayment() threw Exception");
+    }
     //establish connection with database and overwrite receipt customer Id column with with the current customer Id.
-    try{
+    try {
       MySqlConnection connection = await Queries.getConnection();
       bool success = false;
       Queries.editReceiptCid(connection, receiptId, userId);
       success = true;
-      print("############################## RECEIPT SUCCESS? " + success.toString());
-
-    } catch(e){
+      print("############################## RECEIPT SUCCESS? $success");
+    } catch (e) {
       print("############################## EXCEPTION : Scan failed");
-
     }
-    //showAlertDialog(context);
-    Navigator.push(
-        context, MaterialPageRoute(
-        builder: (_) =>  CustomerScannedReceiptPage(receiptID: receiptId)));
+
   }
 
   void loadCustomerAccountPage() {}
@@ -83,37 +139,46 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     Session.clearSessionUser();
     Navigator.pop(context);
     Navigator.pop(context);
+    Navigator.push(context, MaterialPageRoute(builder: (_) => const LogInPage()));
   }
 
-  //
-  // showAlertDialog(BuildContext context) {
-  //
-  //   // set up the button
-  //   Widget okButton = TextButton(
-  //     child: const Text("OK"),
-  //     onPressed: () {
-  //     Navigator.push(
-  //         context, MaterialPageRoute(
-  //         builder: (_) => const CustomerScannedReceiptPage())); },
-  //   );
-  //
-  //   // set up the AlertDialog
-  //   AlertDialog alert = AlertDialog(
-  //     title: const Text("Scan Success"),
-  //     content: const Text("Receipt Added"),
-  //     actions: [
-  //       okButton,
-  //     ],
-  //   );
-  //
-  //   // show the dialog
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return alert;
-  //     },
-  //   );
-  // }
+
+  showAlertDialog(BuildContext context) {
+    // set up the button
+    Widget yesButton = TextButton(
+      style: TextButton.styleFrom(backgroundColor: Colors.greenAccent,
+          textStyle: const TextStyle(color: Colors.black)),
+      onPressed: () async {
+        await makePayment(receiptId);
+      },
+      child: const Text("Pay"),
+    );
+    // set up the button
+    Widget cancelButton = TextButton(
+      child: const Text("Cancel"),
+      onPressed: () {
+        Navigator.pop(context);
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: const Text("Checkout"),
+      content: const Text("Proceed with payment?"),
+      actions: [
+        yesButton,
+        cancelButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +223,10 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
           Container(
             padding: const EdgeInsets.all(8),
             color: Colors.blue,
-            width: MediaQuery.of(context).size.width,
+            width: MediaQuery
+                .of(context)
+                .size
+                .width,
             child: Padding(
               padding: const EdgeInsets.all(8),
               child: Text(
@@ -175,8 +243,14 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
               children: [
                 Container(
                   margin: const EdgeInsets.all(8),
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 4.5,
+                  width: MediaQuery
+                      .of(context)
+                      .size
+                      .width,
+                  height: MediaQuery
+                      .of(context)
+                      .size
+                      .height / 4.5,
                   color: Utility.getBackGroundColor(),
                   child: TextButton(
                     onPressed: loadCustomerAccountPage,
@@ -188,8 +262,14 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                 ),
                 Container(
                   margin: const EdgeInsets.all(8),
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 4.5,
+                  width: MediaQuery
+                      .of(context)
+                      .size
+                      .width,
+                  height: MediaQuery
+                      .of(context)
+                      .size
+                      .height / 4.5,
                   color: Utility.getBackGroundColor(),
                   child: TextButton(
                     onPressed: loadScanReceiptPage,
@@ -201,8 +281,14 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                 ),
                 Container(
                   margin: const EdgeInsets.all(8),
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 4.5,
+                  width: MediaQuery
+                      .of(context)
+                      .size
+                      .width,
+                  height: MediaQuery
+                      .of(context)
+                      .size
+                      .height / 4.5,
                   color: Utility.getBackGroundColor(),
                   child: TextButton(
                     onPressed: loadReceiptHistoryPage,

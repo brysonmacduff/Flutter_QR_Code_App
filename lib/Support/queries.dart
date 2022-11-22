@@ -35,6 +35,20 @@ class Queries {
       return null;
     }
   }
+  static getReceiptAmount(MySqlConnection conn, int receiptId) async {
+    String query = "select * from receipt where rId='$receiptId'";
+    try{
+      var results = await conn.query(query);
+      var iterator = results.iterator;
+      while (iterator.moveNext()) {
+        var result = iterator.current;
+        print(result["rCost"]);
+        return result["rCost"];
+      }
+    }catch(e){
+      return null;
+    }
+  }
   static editStripeId(MySqlConnection conn, String sId, int cId) async {
     try {
       String query = "update customer set cStripe_Id='" +
@@ -297,7 +311,29 @@ class Queries {
       return null;
     }
   }
+  static getCustomerScannedReceiptItemsQuantity(conn, receiptId) async {
+    // String query = "select * from receiptitem where rid = '" + receiptId.toString() + "'";
+    String query = "select * from receiptitem join item on item.iId = receiptitem.iId where rid = '" + receiptId.toString() + "'";
+    // result rows are in JSON format
+    try {
+      List<int> itemsQuantity = <int>[];
+      var results = await conn.query(query);
+      var iterator = results.iterator;
 
+      while (iterator.moveNext()) {
+        var result = iterator.current;
+
+        int riiQuantity = result["riiQuantity"];
+
+        itemsQuantity.add(riiQuantity);
+      }
+
+      return itemsQuantity;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
   // gets the business items that pertain to a merchant identified by mId
   static getCustomerScannedReceiptItems(MySqlConnection conn, int receiptId) async {
     // String query = "select * from receiptitem where rid = '" + receiptId.toString() + "'";
@@ -499,17 +535,7 @@ class Queries {
   static insertReceipt(MySqlConnection conn, Receipt receipt) async {
     try {
       // insert receipt tuple---------------------------------------------------
-      String query = "insert into receipt values('" +
-          receipt.getId().toString() +
-          "','" +
-          receipt.getDateTime().toString() +
-          "','" +
-          receipt.getCost().toString() +
-          "','" +
-          receipt.getMerchantId().toString() +
-          "','" +
-          receipt.getCustomerId().toString() +
-          "')";
+      String query = "insert into receipt values('${receipt.getId()}','${receipt.getDateTime()}','${receipt.getCost()}','${receipt.getMerchantId()}','${receipt.getCustomerId()}')";
       await conn.query(query);
 
       // insert receipt item tuples--------------------------------------------------
@@ -519,15 +545,7 @@ class Queries {
         ReceiptItem ri = riList[i];
         var result = await _getMaxReceiptItemId(conn);
         int receiptItemId = result.first["maxId"] + 1;
-        query = "insert into ReceiptItem values('" +
-            receiptItemId.toString() +
-            "','" +
-            ri.getQuanity().toString() +
-            "','" +
-            receipt.getId().toString() +
-            "','" +
-            ri.getItem().getItemId().toString() +
-            "')";
+        query = "insert into ReceiptItem values('$receiptItemId','${ri.getQuanity()}','${receipt.getId()}','${ri.getItem().getItemId()}')";
         await conn.query(query);
       }
       return true;
@@ -566,4 +584,6 @@ class Queries {
       return null;
     }
   }
+
+
 }

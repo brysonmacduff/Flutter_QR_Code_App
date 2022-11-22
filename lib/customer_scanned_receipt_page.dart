@@ -1,6 +1,7 @@
 import 'package:ceg4912_project/Support/utility.dart';
 import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/Support/session.dart';
+import 'package:ceg4912_project/customer_home.dart';
 import 'package:ceg4912_project/merchant_receipt_page.dart';
 import 'package:flutter/material.dart';
 import 'package:ceg4912_project/Models/item.dart';
@@ -18,6 +19,8 @@ class CustomerScannedReceiptPage extends StatefulWidget {
 class CustomerScannedReceiptPageState extends State<CustomerScannedReceiptPage> {
   // locally stores the customer's receipt items
   List<Item> receiptItems = List<Item>.empty(growable: true);
+  List<int> ItemsQuantity = List<int>.empty(growable: true);
+
   // stores the widgets the represent the customer's receipt items in the UI
   List<Widget> receiptItemWidgets = <Widget>[];
 
@@ -40,6 +43,8 @@ class CustomerScannedReceiptPageState extends State<CustomerScannedReceiptPage> 
     int cId = Session.getSessionUser().getId();
     var conn = await Queries.getConnection();
     receiptItems = await Queries.getCustomerScannedReceiptItems(conn, receiptID);
+    ItemsQuantity = await Queries.getCustomerScannedReceiptItemsQuantity(conn, receiptID);
+
 
     // if the query went wrong then it would return null
     if (receiptItems == null) {
@@ -65,7 +70,7 @@ class CustomerScannedReceiptPageState extends State<CustomerScannedReceiptPage> 
 
     int k = 0;
     for (int i = 0; i < receiptItems.length; i++) {
-      // check if the current item is already in the receipt list
+      //check if the current item is already in the receipt list
       bool inReceiptList = false;
       for (int j = 0; j < MerchantReceiptPage.receiptItems.length; j++) {
         if (MerchantReceiptPage.receiptItems[j].getItem().getItemId() ==
@@ -106,7 +111,7 @@ class CustomerScannedReceiptPageState extends State<CustomerScannedReceiptPage> 
             Padding(
               padding: const EdgeInsets.all(8),
               child: Text(
-                receiptItems[itemIndex].getName(),
+                "${receiptItems[itemIndex].getName()} Quantity: ${ItemsQuantity[itemIndex]}" ,
                 style: const TextStyle(color: Colors.white),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -133,6 +138,12 @@ class CustomerScannedReceiptPageState extends State<CustomerScannedReceiptPage> 
       appBar: AppBar(
         title: const Text("Scanned Receipt"),
         backgroundColor: Utility.getBackGroundColor(),
+        leading: BackButton(onPressed: () {
+          Navigator.push(
+              context, MaterialPageRoute(
+              builder: (_) => CustomerHomePage()
+          ));},
+        ),
       ),
       body: ListView(
         children: [
