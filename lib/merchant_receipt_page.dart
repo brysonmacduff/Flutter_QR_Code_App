@@ -184,7 +184,7 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
           arguments: {"qrData": qrData},
         ),
       ),
-    );
+    ).then((value) => {MerchantReceiptQRPage.allowQueries = false});
   }
 
   // gets a complete list of UI widgets for each of the receipt items
