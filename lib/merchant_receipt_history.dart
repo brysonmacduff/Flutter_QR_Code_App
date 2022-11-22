@@ -1,7 +1,9 @@
 import 'package:ceg4912_project/Models/receipt.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Support/queries.dart';
+import 'package:ceg4912_project/Support/utility.dart';
 import 'package:ceg4912_project/merchant_filter.dart';
+import 'package:ceg4912_project/merchant_home.dart';
 import 'package:flutter/material.dart';
 
 import 'Models/item.dart';
@@ -389,52 +391,50 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('Receipt History'),
+        backgroundColor: Utility.getBackGroundColor(),
+        leading: IconButton(
+            alignment: Alignment.centerLeft,
+            onPressed:() => Navigator.push(
+                context,MaterialPageRoute(
+                builder: (_) => const MerchantHomePage(
+                )
+            )),
+            icon: const Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            )
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: ListView(
           children: [
-            // Open the drop down
-            ElevatedButton(
-              child: const Text('Filter'),
-              onPressed: loadMerchantFilterPage,
-            ),
-            ElevatedButton(
-              child: const Text('Sort'),
-              onPressed: _showFilter,
-            ),
             const Divider(
-              height: 30,
+              height:30,
             ),
-            // display selected receipts
-            Wrap(
-              children: _choices
-                  .map((e) => Chip(
-                        label: Text(e),
-                      ))
-                  .toList(),
-            ),
-            ElevatedButton(
-              child: const Text('Get Receipts'),
-              onPressed: _getReceipts,
-            ),
-            Column(
-              children: receiptWidgets,
-            ),
+              ElevatedButton(
+                  onPressed: loadMerchantFilterPage,
+                  child: const Text('Filter By Customer')),
+              ElevatedButton(
+                onPressed: _getReceipts,
+                child: const Text('Search')),
+
+              Column(children: receiptWidgets),
+
             Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                eventMessage,
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: eventMessageColor,
-                  fontSize: 20,
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  eventMessage,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: eventMessageColor,
+                    fontSize: 20,
+                  ),
                 ),
-              ),
             ),
           ],
         ),
