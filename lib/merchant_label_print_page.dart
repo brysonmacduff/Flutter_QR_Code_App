@@ -27,7 +27,7 @@ class _MerchantLabelPrintPageState extends State<MerchantLabelPrintPage> {
     // create an svg barcode image
     final bc = Barcode.code128();
     final svg =
-        bc.toSvg(_item.toLabelJSON(), width: 10, height: 10, fontHeight: 0);
+        bc.toSvg(_item.toLabelJSON(), width: 200, height: 200, fontHeight: 0);
 
     final doc = pw.Document();
     doc.addPage(pw.Page(build: (pw.Context context) {
