@@ -4,6 +4,7 @@ import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/Support/utility.dart';
 import 'package:ceg4912_project/merchant_filter.dart';
 import 'package:ceg4912_project/merchant_home.dart';
+import 'package:ceg4912_project/receipt_item_list_page.dart';
 import 'package:flutter/material.dart';
 
 import 'Models/item.dart';
@@ -104,6 +105,8 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
   List<bool> receiptExpandedStateSet = <bool>[];
   //Stores all customers
   List<int> customerIds = <int>[];
+  //List of items on expanded widget
+  List<Item> widgetItems = <Item>[];
 
   // the color of event messages that are displayed to the user
   Color eventMessageColor = Colors.white;
@@ -230,6 +233,15 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
     }
   }
 
+  void _getReceiptItems(int rid) {
+    widgetItems.clear();
+    List<ReceiptItem> rItems = receipts[rid].getReceiptItems();
+    for (ReceiptItem rItem in rItems) {
+      Item item = rItem.getItem();
+      widgetItems.add(item);
+    }
+  }
+
   // clears the event message after some time has passed
   void clearEventMessage(int delay) {
     Future.delayed(Duration(milliseconds: delay), () {
@@ -277,6 +289,18 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
                   icon: const Icon(
                     Icons.description,
                     color: Colors.blue,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => {_getReceiptItems(i), Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => ReceiptItemListPage(items: widgetItems)
+                      )
+                  )},
+                  icon: const Icon(
+                    Icons.list,
+                    color: Colors.orange,
                   ),
                 )
               ],
