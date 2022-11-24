@@ -1,8 +1,10 @@
+import 'package:ceg4912_project/merchant_receipt_history.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'Support/queries.dart';
 import 'Support/session.dart';
+import 'Support/utility.dart';
 
 class MerchantFilter extends StatefulWidget {
   const MerchantFilter({Key? key}) : super(key: key);
@@ -27,6 +29,8 @@ class _MerchantFilterPageState extends State<MerchantFilter> {
   // Contains selected emails
   List<String> _selectedEmails = [];
 
+  List<int> _selectedCid = [];
+
   @override
   initState() {
     // at the beginning, all users are shown
@@ -44,6 +48,41 @@ class _MerchantFilterPageState extends State<MerchantFilter> {
         _selectedEmails.remove(option);
       }
     });
+  }
+
+   dynamic getCustomerId(List<String> emails) async {
+    List<int> cidlist = [];
+    var cid;
+    for (String email in emails) {
+      try {
+        var conn = await Queries.getConnection();
+        cid = await Queries.getCustomerIdByEmail(conn, email);
+
+        if (cid == null) {
+          Utility.displayAlertMessage(context, "Item Retrieval Failed", "");
+          return;
+        }
+        cidlist.add(cid);
+      } catch (e) {
+        print(e);
+        if (mounted) {
+          Utility.displayAlertMessage(
+              context, "Connection Error", "Please check your network connection.");
+          return;
+        }
+      }
+    } return cidlist;
+  }
+
+  //passes the list of customer emails to the merchant receipt history page
+  Future<void> _passCustomerIds() async {
+    // Contains all selected cid
+    List<int> localCid = await getCustomerId(_selectedEmails);
+
+    Navigator.pop(
+      context,
+      localCid
+      );
   }
 
   void _getCustomerList() async {
@@ -161,6 +200,10 @@ class _MerchantFilterPageState extends State<MerchantFilter> {
                       'No results found',
                       style: TextStyle(fontSize: 24),
                     ),
+            ),
+            ElevatedButton(
+              child: const Text('Submit'),
+              onPressed: _passCustomerIds,
             ),
           ],
         ),

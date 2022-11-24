@@ -1,8 +1,14 @@
 import 'package:ceg4912_project/Models/receipt.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Support/queries.dart';
+import 'package:ceg4912_project/Support/utility.dart';
 import 'package:ceg4912_project/merchant_filter.dart';
+import 'package:ceg4912_project/merchant_home.dart';
+import 'package:ceg4912_project/receipt_item_list_page.dart';
 import 'package:flutter/material.dart';
+
+import 'Models/item.dart';
+import 'Models/receipt_item.dart';
 
 var merchantName = "Amazon";
 
@@ -98,7 +104,9 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
   // keeps track of which receipt widgets are expanded in the UI
   List<bool> receiptExpandedStateSet = <bool>[];
   //Stores all customers
-  List<String> customerEmails = <String>[];
+  List<int> customerIds = <int>[];
+  //List of items on expanded widget
+  List<Item> widgetItems = <Item>[];
 
   // the color of event messages that are displayed to the user
   Color eventMessageColor = Colors.white;
@@ -112,22 +120,91 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
     _getReceipts();
   }
 
-  void loadMerchantFilterPage() {
-    Navigator.push(
+  Future<void> loadMerchantFilterPage() async {
+    var result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => const MerchantFilter(),
       ),
     );
+    customerIds = result;
   }
 
   // generates widgets for all of the current merchant's business receipt
   void _getReceipts() async {
     int mId = Session.getSessionUser().getId();
     // hardcoded cid for now
-    int cId = 1;
+
     var conn = await Queries.getConnection();
-    var mReceipts = await Queries.getMerchantReceipts(conn, mId, cId);
+    //var mReceipts = await Queries.getMerchantReceipts(conn, mId, 1);
+    var mReceipts = [];
+
+    //Get list of receipt ids
+    var receiptIds = await Queries.getMerchantReceiptIds(conn, mId, customerIds);
+
+    //Loops through receipt Ids
+    for(int receiptId in receiptIds) {
+      //Get list of receipt ids for current id
+
+      var receiptItemIds = await Queries.getReceiptItemIds(conn, receiptId);
+      print("ReceiptItemIDs");
+      print(receiptItemIds);
+      if (receiptItemIds == null) {
+        setState(() {
+          eventMessage = "Receipt Retrieval Failed: Receipt has no receipt items.";
+          eventMessageColor = Colors.red;
+        });
+        // clears the event message after 2 seconds have passed
+        clearEventMessage(2000);
+        return;
+      }
+      //Add receipt item ids to the list
+      var receipt_master = [];
+      for(int receiptItemId in receiptItemIds) {
+        receipt_master.add(receiptItemId);
+      }
+
+      var itemTest = await Queries.getItemByReceiptId(conn, 28);
+      //print("printing item");
+      //print(itemTest);
+
+
+      var itemList = [];
+      //Go through receipt items, per receipt, create each item, save in list
+      for(int receiptItemId in receipt_master){
+         var item = await Queries.getItemByReceiptId(conn, receiptItemId);
+         print("legit item:");
+         print(item);
+
+         if (item == null) {
+           setState(() {
+             eventMessage = "Receipt Retrieval Failed: Receipt has no receipt items.";
+             eventMessageColor = Colors.red;
+           });
+           // clears the event message after 2 seconds have passed
+           clearEventMessage(2000);
+           return;
+         }
+         itemList.add(item);
+      }
+
+      //print("test");
+      //print(itemList);
+      //create receipt items
+      var receiptItems = <ReceiptItem>[];
+      for(Item item in itemList) {
+        receiptItems.add(ReceiptItem.create(item));
+      }
+
+      //get dateTime, Cost, mid, cid
+      DateTime dateTime = await Queries.getReceiptDateTime(conn, receiptId);
+      var cost = await Queries.getReceiptCost(conn, receiptId);
+      var cid = await Queries.getReceiptCid(conn, receiptId);
+      int cidparam = int.parse(cid);
+
+      //create the receipt with the current receipt id
+      mReceipts.add(Receipt.all(receiptId, dateTime, cost, mId, cidparam, receiptItems));
+    }
 
     // if the query went wrong then it would return null
     if (mReceipts == null) {
@@ -153,6 +230,15 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
       setState(() {
         receiptWidgets.add(getReceiptWidget(i, false));
       });
+    }
+  }
+
+  void _getReceiptItems(int rid) {
+    widgetItems.clear();
+    List<ReceiptItem> rItems = receipts[rid].getReceiptItems();
+    for (ReceiptItem rItem in rItems) {
+      Item item = rItem.getItem();
+      widgetItems.add(item);
     }
   }
 
@@ -203,6 +289,18 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
                   icon: const Icon(
                     Icons.description,
                     color: Colors.blue,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => {_getReceiptItems(i), Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => ReceiptItemListPage(items: widgetItems)
+                      )
+                  )},
+                  icon: const Icon(
+                    Icons.list,
+                    color: Colors.orange,
                   ),
                 )
               ],
@@ -317,52 +415,50 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('Receipt History'),
+        backgroundColor: Utility.getBackGroundColor(),
+        leading: IconButton(
+            alignment: Alignment.centerLeft,
+            onPressed:() => Navigator.push(
+                context,MaterialPageRoute(
+                builder: (_) => const MerchantHomePage(
+                )
+            )),
+            icon: const Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            )
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: ListView(
           children: [
-            // Open the drop down
-            ElevatedButton(
-              child: const Text('Filter'),
-              onPressed: loadMerchantFilterPage,
-            ),
-            ElevatedButton(
-              child: const Text('Sort'),
-              onPressed: _showFilter,
-            ),
             const Divider(
-              height: 30,
+              height:30,
             ),
-            // display selected receipts
-            Wrap(
-              children: _choices
-                  .map((e) => Chip(
-                        label: Text(e),
-                      ))
-                  .toList(),
-            ),
-            ElevatedButton(
-              child: const Text('Get Receipts'),
-              onPressed: _getReceipts,
-            ),
-            Column(
-              children: receiptWidgets,
-            ),
+              ElevatedButton(
+                  onPressed: loadMerchantFilterPage,
+                  child: const Text('Filter By Customer')),
+              ElevatedButton(
+                onPressed: _getReceipts,
+                child: const Text('Search')),
+
+              Column(children: receiptWidgets),
+
             Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                eventMessage,
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: eventMessageColor,
-                  fontSize: 20,
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  eventMessage,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: eventMessageColor,
+                    fontSize: 20,
+                  ),
                 ),
-              ),
             ),
           ],
         ),
