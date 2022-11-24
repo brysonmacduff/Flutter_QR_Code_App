@@ -25,7 +25,8 @@ class _MerchantLabelPrintPageState extends State<MerchantLabelPrintPage> {
 
   void printLabel() async {
     // create an svg barcode image
-    final bc = Barcode.code128();
+    //final bc = Barcode.code128();
+    final bc = Barcode.qrCode();
     final svg =
         bc.toSvg(_item.toLabelJSON(), width: 200, height: 200, fontHeight: 0);
 
@@ -63,8 +64,7 @@ class _MerchantLabelPrintPageState extends State<MerchantLabelPrintPage> {
           child: Zoom(
             child: BarcodeWidget(
               data: _item.toLabelJSON(),
-              barcode: Barcode.code128(),
-              width: MediaQuery.of(context).size.width / 1.125,
+              barcode: Barcode.qrCode(),
               drawText: false,
             ),
           ),
