@@ -120,6 +120,7 @@ class _LogInPageState extends State<LogInPage> {
               child: TextField(
                 decoration: const InputDecoration(labelText: 'Email'),
                 onChanged: (value) => email = value,
+                keyboardType: TextInputType.emailAddress,
               ),
             ),
             Padding(

@@ -554,4 +554,27 @@ class Queries {
       return false;
     }
   }
+
+  // checks if a customer id is associated to a receipt
+  static isPaymentComplete(MySqlConnection conn, int receiptId) async {
+    try {
+      String query = "select cid as customerId from receipt where rid = '" +
+          receiptId.toString() +
+          "';";
+      var results = await conn.query(query);
+      //print("Queries.isPaymentComplete(): results: " + results.toString());
+      //var cId = results.first["cid"];
+      var cId = results.first["customerId"];
+      //int cId = results.iterator.current["cid"];
+      if (cId != -1) {
+        return true;
+      }
+    } catch (e) {
+      print("Queries.isPaymentComplete(): Failed to get receipt data. Error: " +
+          e.toString());
+    }
+
+    // if something went wrong then just return false
+    return false;
+  }
 }

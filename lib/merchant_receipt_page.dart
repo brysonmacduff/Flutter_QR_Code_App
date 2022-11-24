@@ -61,7 +61,7 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
   Future<void> scanLabel() async {
     // starts the barcode scan and returns the barcode data
     String result = await FlutterBarcodeScanner.scanBarcode(
-        '#ff6666', 'Cancel', true, ScanMode.BARCODE);
+        '#ff6666', 'Cancel', true, ScanMode.QR);
     print("label data: " + result);
 
     // If the merchant cancels the scan then the result returns -1.
@@ -184,7 +184,7 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
           arguments: {"qrData": qrData},
         ),
       ),
-    );
+    ).then((value) => {MerchantReceiptQRPage.allowQueries = false});
   }
 
   // gets a complete list of UI widgets for each of the receipt items
