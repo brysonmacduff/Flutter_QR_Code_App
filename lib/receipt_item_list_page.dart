@@ -1,5 +1,3 @@
-
-
 import 'package:ceg4912_project/Support/utility.dart';
 import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/Support/session.dart';
