@@ -36,7 +36,7 @@ class ReceiptSystemModel extends ChangeNotifier {
   late ContractFunction _getReceiptCount;
 
   ReceiptSystemModel() {
-    // init();
+    init();
   }
 
   Future<void> init() async {
@@ -53,7 +53,7 @@ class ReceiptSystemModel extends ChangeNotifier {
     var jsonAbi = jsonDecode(abiStringFile);
     _abiCode = jsonEncode(jsonAbi["abi"]);
     _contractAddress =
-        EthereumAddress.fromHex(jsonAbi["networks"]["5777"]["address"]);
+        EthereumAddress.fromHex("0x4c9224B0Bb5feAB053E93699bd09a804f77DEd20");
     await getCredentials();
   }
 
@@ -93,14 +93,10 @@ class ReceiptSystemModel extends ChangeNotifier {
   }
 
   void insertReceipt(
-      int Rid,
-      // String DateTime,
-      // double cost,
-      int Mid,
-      int Cid) async {
+      int Rid, String DateTime, double cost, int Mid, int Cid) async {
     isLoading = true;
     notifyListeners();
-    // int nCost = (cost * 100).toInt();
+    int nCost = (cost * 100).toInt();
     await _web3client.sendTransaction(
         _credentials,
         Transaction.callContract(
@@ -108,22 +104,10 @@ class ReceiptSystemModel extends ChangeNotifier {
             function: _insertReceipt,
             parameters: [
               BigInt.from(Rid),
-              // DateTime,
-              // BigInt.from(nCost),
+              DateTime,
+              BigInt.from(nCost),
               BigInt.from(Mid),
               BigInt.from(Cid)
             ]));
-
-    // await _web3client.sendTransaction(
-    //   _credentials,
-    //   Transaction(
-    //     to: EthereumAddress.fromHex(
-    //         '0x1C2D21547aE6bADDc52bc0775e3ddD52dAc552cD'),
-    //     gasPrice: EtherAmount.inWei(BigInt.from(1)),
-    //     maxGas: 100000,
-    //     value: EtherAmount.fromUnitAndValue(EtherUnit.ether, BigInt.from(0)),
-    //   ),
-    // );
-    // await getReceipts();
   }
 }

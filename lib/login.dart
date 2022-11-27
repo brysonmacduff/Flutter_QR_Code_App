@@ -20,12 +20,6 @@ import 'package:ceg4912_project/Models/user.dart';
 
 //import 'item_page.dart';
 
-//TEST REMOVE LATER
-import 'package:provider/provider.dart';
-import 'package:flutter/material.dart';
-import 'package:ceg4912_project/Models/ReceiptSystemModel.dart';
-import 'BlockchainTestPage.dart';
-
 class LogInPageRoute extends StatelessWidget {
   const LogInPageRoute({Key? key}) : super(key: key);
 

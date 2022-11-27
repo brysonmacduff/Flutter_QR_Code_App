@@ -10,19 +10,6 @@ import 'package:web3dart/web3dart.dart';
 import 'package:http/http.dart';
 import 'package:web_socket_channel/io.dart';
 
-// class ReceiptSystem extends StatelessWidget with ChangeNotifier {
-//   ReceiptSystem({Key? key}) : super(key: key);
-//   @override
-//   Widget build(BuildContext context) {
-//     var listModel = Provider.of<ReceiptSystemModel>(context, listen: false);
-//     return Scaffold(
-//         appBar: AppBar(
-//           title: Text("Test Dapp"),
-//         ),
-//         floatingActionButton: FloatingActionButton(
-//             onPressed: () => listModel.insertReceipt(1, 1, 1)));
-//   }
-// }
 class ReceiptSystem extends StatefulWidget {
   ReceiptSystem({Key? key}) : super(key: key);
 
