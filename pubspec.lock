@@ -98,7 +98,6 @@ packages:
       name: date_field
       url: "https://pub.dartlang.org"
     source: hosted
-
     version: "3.0.1"
   eip55:
     dependency: transitive
@@ -106,7 +105,7 @@ packages:
       name: eip55
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.2"
+    version: "1.0.2"
   fake_async:
     dependency: transitive
     description:
@@ -171,7 +170,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-
   freezed_annotation:
     dependency: transitive
     description:
@@ -179,7 +177,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.0"
-
   http:
     dependency: "direct main"
     description:
@@ -194,7 +191,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.0.2"
-
   image:
     dependency: transitive
     description:
@@ -202,7 +198,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.2.2"
-
   intl:
     dependency: transitive
     description:
@@ -217,15 +212,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.4"
-
-  json_rpc_2:
-    dependency: transitive
-    description:
-      name: json_rpc_2
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.0.2"
-
   json_annotation:
     dependency: transitive
     description:
@@ -233,7 +219,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.7.0"
-
+  json_rpc_2:
+    dependency: transitive
+    description:
+      name: json_rpc_2
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.2"
   lints:
     dependency: transitive
     description:
@@ -290,15 +282,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.8.2"
-
-  pointycastle:
-    dependency: transitive
-    description:
-      name: pointycastle
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.6.2"
-
   path_parsing:
     dependency: transitive
     description:
@@ -396,9 +379,7 @@ packages:
       name: pool
       url: "https://pub.dartlang.org"
     source: hosted
-
     version: "1.5.1"
-    
   printing:
     dependency: "direct main"
     description:
@@ -413,7 +394,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.2.4"
-
+  provider:
+    dependency: "direct main"
+    description:
+      name: provider
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "6.0.4"
   qr:
     dependency: transitive
     description:
@@ -510,15 +497,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.3.1"
-
-  uuid:
-    dependency: transitive
-    description:
-      name: uuid
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.0.7"
-
   url_launcher_platform_interface:
     dependency: transitive
     description:
@@ -533,7 +511,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.13"
-
+  uuid:
+    dependency: transitive
+    description:
+      name: uuid
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.7"
   vector_math:
     dependency: transitive
     description:
@@ -541,7 +525,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.2"
-
   web3dart:
     dependency: "direct main"
     description:
@@ -556,7 +539,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.0"
-
   win32:
     dependency: transitive
     description:
@@ -578,7 +560,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "6.1.0"
-
   zoom_widget:
     dependency: "direct main"
     description:
@@ -588,6 +569,4 @@ packages:
     version: "2.0.0"
 sdks:
   dart: ">=2.18.0 <3.0.0"
-
   flutter: ">=3.0.0"
-

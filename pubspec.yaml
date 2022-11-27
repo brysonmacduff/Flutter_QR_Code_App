@@ -40,7 +40,6 @@ dependencies:
   barcode: ^2.2.3
 
   url_launcher_web: ^2.0.13
-  http:
   barcode_image: ^2.0.2
   pdf: ^3.8.4
   printing: ^5.9.3
