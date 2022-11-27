@@ -69,8 +69,6 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
     );
   }
 
-  void loadMerchantAccountPage() {}
-
   void loadSettings() {
     // Does nothing right now. WIP.
     // The pop is needed since this function's button is inside another BuildContext. This closes the PopupMenu.
@@ -142,19 +140,6 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
             child: ListView(
               padding: const EdgeInsets.all(8),
               children: [
-                Container(
-                  margin: const EdgeInsets.all(8),
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 4.5,
-                  color: Utility.getBackGroundColor(),
-                  child: TextButton(
-                    onPressed: loadMerchantAccountPage,
-                    child: const Text(
-                      "Account",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
                 Container(
                   margin: const EdgeInsets.all(8),
                   width: MediaQuery.of(context).size.width,

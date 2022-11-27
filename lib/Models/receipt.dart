@@ -37,6 +37,14 @@ class Receipt {
     _receiptItems = receiptItems;
   }
 
+  Receipt.no_items(int id, DateTime dateTime, double cost, int mId, int cId) {
+    _id = id;
+    _dateTime = dateTime;
+    _cost = cost;
+    _mid = mId;
+    _cid = cId;
+  }
+
   int getId() {
     return _id;
   }
