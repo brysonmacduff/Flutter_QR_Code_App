@@ -99,12 +99,6 @@ class ReceiptItemListPageState extends State<ReceiptItemListPage> {
       appBar: AppBar(
         title: const Text("List Of Items"),
         backgroundColor: Utility.getBackGroundColor(),
-        leading: BackButton(onPressed: () {
-          Navigator.push(
-              context, MaterialPageRoute(
-              builder: (_) => MerchantReceiptHistoryPage()
-          ));},
-        ),
       ),
       body: ListView(
         children: [
