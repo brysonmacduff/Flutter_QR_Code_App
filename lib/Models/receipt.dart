@@ -10,13 +10,22 @@ class Receipt {
 
   Receipt.empty();
 
-  Receipt.all(int id, DateTime dateTime, double cost, int mid, int cid, List<ReceiptItem> receiptItems) {
+  Receipt.all(int id, DateTime dateTime, double cost, int mid, int cid,
+      List<ReceiptItem> receiptItems) {
     _id = id;
     _dateTime = dateTime;
     _cost = cost;
     _mid = mid;
     _cid = cid;
     _receiptItems = receiptItems;
+  }
+
+  Receipt.no_items(int id, DateTime dateTime, double cost, int mId, int cId) {
+    _id = id;
+    _dateTime = dateTime;
+    _cost = cost;
+    _mid = mId;
+    _cid = cId;
   }
 
   int getId() {

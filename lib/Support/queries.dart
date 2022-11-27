@@ -27,23 +27,25 @@ class Queries {
       return;
     }
   }
+
   //returns customerId based on email
   static getCustomerId(MySqlConnection conn, String email) async {
-    String query = "select cId from customer where cEmail='"+email+"'";
-    try{
+    String query = "select cId from customer where cEmail='" + email + "'";
+    try {
       var results = await conn.query(query);
       var iterator = results.iterator;
       while (iterator.moveNext()) {
         var result = iterator.current;
         return result["cId"];
       }
-    }catch(e){
+    } catch (e) {
       return null;
     }
   }
+
   static getReceiptAmount(MySqlConnection conn, int receiptId) async {
     String query = "select * from receipt where rId='$receiptId'";
-    try{
+    try {
       var results = await conn.query(query);
       var iterator = results.iterator;
       while (iterator.moveNext()) {
@@ -51,10 +53,11 @@ class Queries {
         print(result["rCost"]);
         return result["rCost"];
       }
-    }catch(e){
+    } catch (e) {
       return null;
     }
   }
+
   static editStripeId(MySqlConnection conn, String sId, int cId) async {
     try {
       String query = "update customer set cStripe_Id='" +
@@ -167,9 +170,9 @@ class Queries {
       String cQuery = "insert into customer values (" +
           nextId +
           ",'" +
-          email+
-          "','"+
-          password+
+          email +
+          "','" +
+          password +
           "','')";
       await conn.query(cQuery);
 
@@ -317,9 +320,13 @@ class Queries {
       return null;
     }
   }
+
   static getCustomerScannedReceiptItemsQuantity(conn, receiptId) async {
     // String query = "select * from receiptitem where rid = '" + receiptId.toString() + "'";
-    String query = "select * from receiptitem join item on item.iId = receiptitem.iId where rid = '" + receiptId.toString() + "'";
+    String query =
+        "select * from receiptitem join item on item.iId = receiptitem.iId where rid = '" +
+            receiptId.toString() +
+            "'";
     // result rows are in JSON format
     try {
       List<int> itemsQuantity = <int>[];
@@ -340,10 +347,15 @@ class Queries {
       return null;
     }
   }
+
   // gets the business items that pertain to a merchant identified by mId
-  static getCustomerScannedReceiptItems(MySqlConnection conn, int receiptId) async {
+  static getCustomerScannedReceiptItems(
+      MySqlConnection conn, int receiptId) async {
     // String query = "select * from receiptitem where rid = '" + receiptId.toString() + "'";
-    String query = "select * from receiptitem join item on item.iId = receiptitem.iId where rid = '" + receiptId.toString() + "'";
+    String query =
+        "select * from receiptitem join item on item.iId = receiptitem.iId where rid = '" +
+            receiptId.toString() +
+            "'";
     // result rows are in JSON format
     try {
       List<Item> items = <Item>[];
@@ -468,6 +480,7 @@ class Queries {
       return false;
     }
   }
+
   //Updates the customer Id column in the receipt table
   static editReceiptCid(MySqlConnection conn, int rId, int cId) async {
     try {
@@ -567,7 +580,7 @@ class Queries {
       return null;
     }
   }
-
+  /*
   static getCustomerReceipts(MySqlConnection conn, int cId) async {
     String query = "select * from receipt where cid = '" + cId.toString() + "'";
     // result rows are in JSON format
@@ -627,7 +640,7 @@ class Queries {
       print(e);
       return null;
     }
-  }
+  }*/
 
   // returns all customers that have a receipt at a given merchant
   static getCustomerEmails(MySqlConnection conn, int mid) async {
@@ -701,9 +714,10 @@ class Queries {
   }
 
   static getItemByReceiptId(MySqlConnection conn, int riid) async {
-    String query = "select distinct * from item as i JOIN receiptItem as j ON riid where riid = '" +
-        riid.toString() +
-        "' and i.iId = j.iId";
+    String query =
+        "select distinct * from item as i JOIN receiptItem as j ON riid where riid = '" +
+            riid.toString() +
+            "' and i.iId = j.iId";
     var item;
     // result rows are in JSON format
     try {
@@ -735,10 +749,11 @@ class Queries {
           category = Categories.none;
         }
 
-        item = Item.all(itemId, mid, itemName, itemCode, itemDetails, category, itemPrice, taxable);
+        item = Item.all(itemId, mid, itemName, itemCode, itemDetails, category,
+            itemPrice, taxable);
 
         //for (Item i in items) {
-          //receiptItems.add(ReceiptItem.create(i));
+        //receiptItems.add(ReceiptItem.create(i));
         //};
       }
       return item;
@@ -802,7 +817,8 @@ class Queries {
   static insertReceipt(MySqlConnection conn, Receipt receipt) async {
     try {
       // insert receipt tuple---------------------------------------------------
-      String query = "insert into receipt values('${receipt.getId()}','${receipt.getDateTime()}','${receipt.getCost()}','${receipt.getMerchantId()}','${receipt.getCustomerId()}')";
+      String query =
+          "insert into receipt values('${receipt.getId()}','${receipt.getDateTime()}','${receipt.getCost()}','${receipt.getMerchantId()}','${receipt.getCustomerId()}')";
       await conn.query(query);
 
       // insert receipt item tuples--------------------------------------------------
@@ -812,7 +828,8 @@ class Queries {
         ReceiptItem ri = riList[i];
         var result = await _getMaxReceiptItemId(conn);
         int receiptItemId = result.first["maxId"] + 1;
-        query = "insert into ReceiptItem values('$receiptItemId','${ri.getQuanity()}','${receipt.getId()}','${ri.getItem().getItemId()}')";
+        query =
+            "insert into ReceiptItem values('$receiptItemId','${ri.getQuanity()}','${receipt.getId()}','${ri.getItem().getItemId()}')";
         await conn.query(query);
       }
       return true;
@@ -852,8 +869,6 @@ class Queries {
     }
   }
 
-
-
   // checks if a customer id is associated to a receipt
   static isPaymentComplete(MySqlConnection conn, int receiptId) async {
     try {
@@ -876,5 +891,4 @@ class Queries {
     // if something went wrong then just return false
     return false;
   }
-
 }

@@ -156,7 +156,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-
   freezed_annotation:
     dependency: transitive
     description:
@@ -166,7 +165,6 @@ packages:
     version: "2.2.0"
   http:
     dependency: "direct main"
-    
     description:
       name: http
       url: "https://pub.dartlang.org"
@@ -179,7 +177,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.0.2"
-
   image:
     dependency: transitive
     description:
@@ -187,7 +184,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.2.2"
-
   intl:
     dependency: transitive
     description:
@@ -258,7 +254,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.8.2"
-
   path_parsing:
     dependency: transitive
     description:
@@ -349,7 +344,6 @@ packages:
       name: pool
       url: "https://pub.dartlang.org"
     source: hosted
-
     version: "1.5.0"
   printing:
     dependency: "direct main"
@@ -365,7 +359,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.2.4"
-
   qr:
     dependency: transitive
     description:
@@ -507,4 +500,3 @@ packages:
 sdks:
   dart: ">=2.18.0 <3.0.0"
   flutter: ">=3.0.0"
-

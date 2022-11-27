@@ -7,8 +7,6 @@ import 'package:ceg4912_project/customer_payment.dart';
 import 'package:ceg4912_project/customer_receipt_history_page.dart';
 import 'package:ceg4912_project/customer_scanned_receipt_page.dart';
 
-import 'package:ceg4912_project/customer_receipt_history.dart';
-
 import 'package:ceg4912_project/item_page.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Support/utility.dart';
@@ -19,7 +17,6 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:http/http.dart' as http;
 
-
 class CustomerHomePage extends StatefulWidget {
   const CustomerHomePage({Key? key}) : super(key: key);
 
@@ -28,12 +25,12 @@ class CustomerHomePage extends StatefulWidget {
 }
 
 class _CustomerHomePageState extends State<CustomerHomePage> {
-  int receiptId=-1;
+  int receiptId = -1;
   Map<String, dynamic>? paymentIntent;
   final client = http.Client();
   static Map<String, String> headers = {
     'Authorization':
-    'Bearer sk_test_51LTCRODkzVSkvB16MkkVIZ1UZl5ewJzmaB9Qgm9yQrE8jTWX8UjrM1L8cu4ty6BI2SSyLKgvxqXGK1UVANlUQyc500J8r4XRY1',
+        'Bearer sk_test_51LTCRODkzVSkvB16MkkVIZ1UZl5ewJzmaB9Qgm9yQrE8jTWX8UjrM1L8cu4ty6BI2SSyLKgvxqXGK1UVANlUQyc500J8r4XRY1',
     'Content-Type': 'application/x-www-form-urlencoded'
   };
   User user = Session.getSessionUser();
@@ -68,8 +65,15 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
       };
 
       var paymentAmount =
-      //make payment intent
-      paymentIntent = await CustomerPayment.createPaymentIntent(client,double.parse(await Queries.getReceiptAmount(connection, receiptId)).toStringAsFixed(0), 'CAD', pId, cStripId);
+          //make payment intent
+          paymentIntent = await CustomerPayment.createPaymentIntent(
+              client,
+              double.parse(
+                      await Queries.getReceiptAmount(connection, receiptId))
+                  .toStringAsFixed(0),
+              'CAD',
+              pId,
+              cStripId);
 
       var pi = paymentIntent!['id'];
       //confirm payment intent
@@ -90,14 +94,14 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
         print("############################## EXCEPTION : Scan failed");
       }
       Navigator.push(
-          context, MaterialPageRoute(
-          builder: (_) => CustomerScannedReceiptPage(receiptID: receiptId)));
+          context,
+          MaterialPageRoute(
+              builder: (_) =>
+                  CustomerScannedReceiptPage(receiptID: receiptId)));
     } catch (e, s) {
       print('exception:$e$s');
     }
   }
-
-
 
   Future<void> loadScanReceiptPage() async {
     //loads scanning page
@@ -105,14 +109,12 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
         '#ff6666', 'Cancel', true, ScanMode.QR);
     print("label data: " + result);
 
-
     //extracts the receipt Id from the JSON result
 
     // Exit out of here if the user cancelled. The return is -1 in this case.
     if (result == "-1") {
       return;
     }
-
 
     Map extractID = jsonDecode(result);
     print(extractID["receiptId"]);
@@ -125,20 +127,18 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     try {
       //show an alert dialog box to confirm proceed with payment
       showAlertDialog(context);
-    }
-    catch (e) {
+    } catch (e) {
       print("PAYMENT FAILED ==> makePayment() threw Exception");
-
     }
   }
-
 
   void loadCustomerAccountPage() {}
 
   void loadReceiptHistoryPage() {
     Navigator.push(
-        context, MaterialPageRoute(
-        builder: (_) => const CustomerReceiptHistoryPageRoute()));
+        context,
+        MaterialPageRoute(
+            builder: (_) => const CustomerReceiptHistoryPageRoute()));
   }
 
   void loadSettings() {
@@ -152,16 +152,16 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     Session.clearSessionUser();
     Navigator.pop(context);
     Navigator.pop(context);
-    Navigator.push(context, MaterialPageRoute(builder: (_) => const LogInPage()));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (_) => const LogInPage()));
   }
-
-
 
   showAlertDialog(BuildContext context) async {
     MySqlConnection connection = await Queries.getConnection();
     // set up the button
     Widget yesButton = TextButton(
-      style: TextButton.styleFrom(backgroundColor: Colors.greenAccent,
+      style: TextButton.styleFrom(
+          backgroundColor: Colors.greenAccent,
           textStyle: const TextStyle(color: Colors.black)),
       onPressed: () async {
         makePayment(receiptId);
@@ -173,14 +173,15 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
       child: const Text("Cancel"),
       onPressed: () {
         Navigator.of(context).pop(context);
-
       },
     );
 
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
       title: const Text("Checkout"),
-      content:  Text("Proceed with payment?\n\nTotal:  \$" + double.parse(await Queries.getReceiptAmount(connection, receiptId)).toStringAsFixed(0)),
+      content: Text("Proceed with payment?\n\nTotal:  \$" +
+          double.parse(await Queries.getReceiptAmount(connection, receiptId))
+              .toStringAsFixed(0)),
       actions: [
         yesButton,
         cancelButton,
@@ -239,10 +240,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
           Container(
             padding: const EdgeInsets.all(8),
             color: Colors.blue,
-            width: MediaQuery
-                .of(context)
-                .size
-                .width,
+            width: MediaQuery.of(context).size.width,
             child: Padding(
               padding: const EdgeInsets.all(8),
               child: Text(
@@ -259,16 +257,8 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
               children: [
                 Container(
                   margin: const EdgeInsets.all(8),
-
-                  width: MediaQuery
-                      .of(context)
-                      .size
-                      .width,
-                  height: MediaQuery
-                      .of(context)
-                      .size
-                      .height / 4.5,
-
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height / 4.5,
                   color: Utility.getBackGroundColor(),
                   child: TextButton(
                     onPressed: loadScanReceiptPage,
@@ -280,14 +270,8 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                 ),
                 Container(
                   margin: const EdgeInsets.all(8),
-                  width: MediaQuery
-                      .of(context)
-                      .size
-                      .width,
-                  height: MediaQuery
-                      .of(context)
-                      .size
-                      .height / 4.5,
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height / 4.5,
                   color: Utility.getBackGroundColor(),
                   child: TextButton(
                     onPressed: loadReceiptHistoryPage,
