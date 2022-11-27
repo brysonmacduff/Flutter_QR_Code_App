@@ -1,5 +1,3 @@
-
-
 import 'package:ceg4912_project/Support/utility.dart';
 import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/Support/session.dart';
@@ -101,12 +99,6 @@ class ReceiptItemListPageState extends State<ReceiptItemListPage> {
       appBar: AppBar(
         title: const Text("List Of Items"),
         backgroundColor: Utility.getBackGroundColor(),
-        leading: BackButton(onPressed: () {
-          Navigator.push(
-              context, MaterialPageRoute(
-              builder: (_) => MerchantReceiptHistoryPage()
-          ));},
-        ),
       ),
       body: ListView(
         children: [

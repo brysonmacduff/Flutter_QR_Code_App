@@ -10,79 +10,7 @@ import 'package:flutter/material.dart';
 import 'Models/item.dart';
 import 'Models/receipt_item.dart';
 
-var merchantName = "Amazon";
 
-class MerchantReceiptHistoryPageRoute extends StatelessWidget {
-  const MerchantReceiptHistoryPageRoute({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(home: MerchantReceiptHistoryPage());
-  }
-}
-
-// widget for filter and sort
-class Filter extends StatefulWidget {
-  final List<String> choices;
-  const Filter({Key? key, required this.choices}) : super(key: key);
-
-  @override
-  State<StatefulWidget> createState() => _FilterState();
-}
-
-//Class for the filter functionality
-class _FilterState extends State<Filter> {
-  // contains the choices
-  final List<String> _selectedFilterOptions = [];
-
-  // triggered when a checkbox is selected/unselected
-  void _selected(String option, bool isSelected) {
-    setState(() {
-      if (isSelected) {
-        _selectedFilterOptions.add(option);
-      } else {
-        _selectedFilterOptions.remove(option);
-      }
-    });
-  }
-
-  // called when user submits their choices
-  void _submit() {
-    Navigator.pop(context, _selectedFilterOptions);
-  }
-
-  void _cancel() {
-    Navigator.pop(context);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Select Options'),
-      content: SingleChildScrollView(
-        child: ListBody(
-          children: widget.choices
-              .map(
-                (choice) => CheckboxListTile(
-                  value: _selectedFilterOptions.contains(choice),
-                  title: Text(choice),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  onChanged: (isChecked) => _selected(choice, isChecked!),
-                ),
-              )
-              .toList(),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _submit,
-          child: const Text('Submit'),
-        ),
-        TextButton(onPressed: _cancel, child: const Text('Cancel'))
-      ],
-    );
-  }
-}
 
 class MerchantReceiptHistoryPage extends StatefulWidget {
   const MerchantReceiptHistoryPage({Key? key}) : super(key: key);
@@ -93,10 +21,6 @@ class MerchantReceiptHistoryPage extends StatefulWidget {
 
 //Class for the receipt history state
 class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
-  // list of selected filters
-  List<String> _choices = [];
-
-  //New
   // list of receipts
   List<Receipt> receipts = <Receipt>[];
   // stores the UI widgets that represent merchant's receipts
@@ -164,11 +88,6 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
         receipt_master.add(receiptItemId);
       }
 
-      var itemTest = await Queries.getItemByReceiptId(conn, 28);
-      //print("printing item");
-      //print(itemTest);
-
-
       var itemList = [];
       //Go through receipt items, per receipt, create each item, save in list
       for(int receiptItemId in receipt_master){
@@ -188,8 +107,6 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
          itemList.add(item);
       }
 
-      //print("test");
-      //print(itemList);
       //create receipt items
       var receiptItems = <ReceiptItem>[];
       for(Item item in itemList) {
@@ -384,52 +301,12 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
     );
   }
 
-  //End New
-
-  void _showFilter() async {
-    // create list of options
-    // dynamically fetch from database... hardcoded for now
-    final List<String> _options = [
-      'Receipt Number',
-      'Total Price',
-      'Customer Name'
-    ];
-
-    //Store the users selection in results
-    final List<String>? results = await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Filter(choices: _options);
-      },
-    );
-
-    // Update the user interface
-    if (results != null) {
-      setState(() {
-        _choices = results;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         title: const Text('Receipt History'),
         backgroundColor: Utility.getBackGroundColor(),
-        leading: IconButton(
-            alignment: Alignment.centerLeft,
-            onPressed:() => Navigator.push(
-                context,MaterialPageRoute(
-                builder: (_) => const MerchantHomePage(
-                )
-            )),
-            icon: const Icon(
-              Icons.arrow_back,
-              color: Colors.white,
-            )
-        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),

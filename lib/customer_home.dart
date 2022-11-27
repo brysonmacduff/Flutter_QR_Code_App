@@ -89,14 +89,16 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
         Queries.editReceiptCid(connection, receiptId, userId);
         success = true;
         print("############################## RECEIPT SUCCESS? $success");
+        Navigator.of(context).pop();
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) =>
+                    CustomerScannedReceiptPage(receiptID: receiptId)));
       } catch (e) {
         print("############################## EXCEPTION : Scan failed");
       }
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (_) =>
-                  CustomerScannedReceiptPage(receiptID: receiptId)));
+
     } catch (e, s) {
       print('exception:$e$s');
     }
@@ -163,7 +165,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
           backgroundColor: Colors.greenAccent,
           textStyle: const TextStyle(color: Colors.black)),
       onPressed: () async {
-        makePayment(receiptId);
+        await makePayment(receiptId);
       },
       child: const Text("Pay"),
     );
