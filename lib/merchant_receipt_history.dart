@@ -3,7 +3,6 @@ import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/Support/utility.dart';
 import 'package:ceg4912_project/merchant_filter.dart';
-import 'package:ceg4912_project/merchant_home.dart';
 import 'package:ceg4912_project/receipt_item_list_page.dart';
 import 'package:flutter/material.dart';
 
@@ -56,6 +55,8 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
 
   // generates widgets for all of the current merchant's business receipt
   void _getReceipts() async {
+    if (customerIds.isEmpty) return;
+
     int mId = Session.getSessionUser().getId();
     // hardcoded cid for now
 
@@ -71,8 +72,6 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
       //Get list of receipt ids for current id
 
       var receiptItemIds = await Queries.getReceiptItemIds(conn, receiptId);
-      print("ReceiptItemIDs");
-      print(receiptItemIds);
       if (receiptItemIds == null) {
         setState(() {
           eventMessage = "Receipt Retrieval Failed: Receipt has no receipt items.";
@@ -92,8 +91,6 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
       //Go through receipt items, per receipt, create each item, save in list
       for(int receiptItemId in receipt_master){
          var item = await Queries.getItemByReceiptId(conn, receiptItemId);
-         print("legit item:");
-         print(item);
 
          if (item == null) {
            setState(() {
