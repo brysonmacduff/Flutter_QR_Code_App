@@ -113,14 +113,6 @@ class _LogInPageState extends State<LogInPage> {
     );
   }
 
-  void loadBlockchainTestPage() {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => BTest(),
-        ));
-  }
-
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -168,20 +160,6 @@ class _LogInPageState extends State<LogInPage> {
                   onPressed: loadSignUpPage,
                   child: const Text(
                     "Sign Up",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Container(
-                color: Utility.getBackGroundColor(),
-                width: MediaQuery.of(context).size.width / 3,
-                child: TextButton(
-                  onPressed: loadBlockchainTestPage,
-                  child: const Text(
-                    "Test",
                     style: TextStyle(color: Colors.white),
                   ),
                 ),

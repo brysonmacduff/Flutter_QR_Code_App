@@ -36,7 +36,7 @@ class ReceiptSystemModel extends ChangeNotifier {
   late ContractFunction _getReceiptCount;
 
   ReceiptSystemModel() {
-    // init();
+    init();
   }
 
   Future<void> init() async {
@@ -93,14 +93,10 @@ class ReceiptSystemModel extends ChangeNotifier {
   }
 
   void insertReceipt(
-      int Rid,
-      // String DateTime,
-      // double cost,
-      int Mid,
-      int Cid) async {
+      int Rid, String DateTime, double cost, int Mid, int Cid) async {
     isLoading = true;
     notifyListeners();
-    // int nCost = (cost * 100).toInt();
+    int nCost = (cost * 100).toInt();
     await _web3client.sendTransaction(
         _credentials,
         Transaction.callContract(
@@ -108,8 +104,8 @@ class ReceiptSystemModel extends ChangeNotifier {
             function: _insertReceipt,
             parameters: [
               BigInt.from(Rid),
-              // DateTime,
-              // BigInt.from(nCost),
+              DateTime,
+              BigInt.from(nCost),
               BigInt.from(Mid),
               BigInt.from(Cid)
             ]));

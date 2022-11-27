@@ -1,0 +1,151 @@
+[
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "Rid",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "DateTime",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "Cost",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "Mid",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "Cid",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "ReceiptCount",
+          "type": "uint256"
+        }
+      ],
+      "name": "LogReceipt",
+      "type": "event"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ReceiptCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_Rid",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "_DateTime",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_Cost",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_Mid",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_Cid",
+          "type": "uint256"
+        }
+      ],
+      "name": "insertReceipt",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "getReceipt",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "Rid",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "DateTime",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "Cost",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "Mid",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "Cid",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getReceiptCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "count",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]
