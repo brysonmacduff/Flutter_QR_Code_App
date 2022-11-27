@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/item_page.dart';
 import 'package:ceg4912_project/Support/session.dart';
@@ -30,8 +29,16 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
 
   void loadReceiptPage() async {
     int mId = Session.getSessionUser().getId();
-    var conn = await Queries.getConnection();
-    var mItems = await Queries.getMerchantItems(conn, mId);
+
+    var conn;
+    var mItems;
+    try {
+      conn = await Queries.getConnection();
+      mItems = await Queries.getMerchantItems(conn, mId);
+    } catch (e) {
+      Utility.displayAlertMessage(context, "Failed to Retrieve Data",
+          "Please check your network connection.");
+    }
 
     // exit if something went wrong
     if (mItems == null) {
@@ -61,8 +68,6 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
       ),
     );
   }
-
-  void loadMerchantAccountPage() {}
 
   void loadSettings() {
     // Does nothing right now. WIP.
@@ -135,19 +140,6 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
             child: ListView(
               padding: const EdgeInsets.all(8),
               children: [
-                Container(
-                  margin: const EdgeInsets.all(8),
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 4.5,
-                  color: Utility.getBackGroundColor(),
-                  child: TextButton(
-                    onPressed: loadMerchantAccountPage,
-                    child: const Text(
-                      "Account",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
                 Container(
                   margin: const EdgeInsets.all(8),
                   width: MediaQuery.of(context).size.width,

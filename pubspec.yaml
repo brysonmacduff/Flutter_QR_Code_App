@@ -38,9 +38,13 @@ dependencies:
   flutter_barcode_scanner: ^2.0.0
   barcode_widget: ^2.0.3
   barcode: ^2.2.3
+
   url_launcher_web: ^2.0.13
   http:
-
+  barcode_image: ^2.0.2
+  pdf: ^3.8.4
+  printing: ^5.9.3
+  path_provider: ^2.0.11
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -76,6 +80,9 @@ flutter:
     - assets/images/CoilSpringIcon.jpg
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
+
+  assets:
+      - assets/images/LabelBarcode.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

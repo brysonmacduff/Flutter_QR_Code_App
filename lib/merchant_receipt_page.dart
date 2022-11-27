@@ -61,7 +61,7 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
   Future<void> scanLabel() async {
     // starts the barcode scan and returns the barcode data
     String result = await FlutterBarcodeScanner.scanBarcode(
-        '#ff6666', 'Cancel', true, ScanMode.BARCODE);
+        '#ff6666', 'Cancel', true, ScanMode.QR);
     print("label data: " + result);
 
     // If the merchant cancels the scan then the result returns -1.
@@ -129,22 +129,11 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
   // Convert receipt data to JSON and generate a QR code. Pushes a new page that has a big receipt QR code.
   void finishReceipt() async {
     if (MerchantReceiptPage.receiptItems.isEmpty) {
+      Utility.displayAlertMessage(
+          context, "Receipt Creation Failed", "Your receipt has no items.");
       return;
     }
-    /*
-    String qrData = "{\"merchantId\":\"" +
-        Session.getSessionUser().getId().toString() +
-        "\",\"items\":";
-    for (int i = 0; i < MerchantReceiptPage.receiptItems.length; i++) {
-      ReceiptItem ri = MerchantReceiptPage.receiptItems[i];
-      if (i == MerchantReceiptPage.receiptItems.length - 1) {
-        qrData += ri.toJSON();
-      } else {
-        qrData += ri.toJSON() + ",";
-      }
-    }
-    qrData += "}";
-    print(qrData);*/
+
     MySqlConnection conn;
 
     // get the next available receipt id from the database
@@ -154,7 +143,8 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
       var result = await Queries.getMaxReceiptId(conn);
       receiptId = result.first["maxId"] + 1;
     } catch (e) {
-      print("Receipt ID SQL query failed.");
+      Utility.displayAlertMessage(
+          context, "Connection Error", "Please check your network connection.");
       return;
     }
 
@@ -172,12 +162,13 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
     try {
       conn = await Queries.getConnection();
       insertionResult = await Queries.insertReceipt(conn, receipt);
+      if (!insertionResult) {
+        Utility.displayAlertMessage(context, "Receipt Creation Failed", "");
+        return;
+      }
     } catch (e) {
-      print("Failed to insert receipt to the database.");
-      return;
-    }
-
-    if (insertionResult == false) {
+      Utility.displayAlertMessage(
+          context, "Connection Error", "Please check your network connection.");
       return;
     }
 
@@ -193,7 +184,7 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
           arguments: {"qrData": qrData},
         ),
       ),
-    );
+    ).then((value) => {MerchantReceiptQRPage.allowQueries = false});
   }
 
   // gets a complete list of UI widgets for each of the receipt items
@@ -206,7 +197,6 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
       final pair = <int, Widget>{id: widget};
       pairs.addAll(pair);
     }
-    print("receipt item widget count: " + pairs.length.toString());
     return pairs;
   }
 

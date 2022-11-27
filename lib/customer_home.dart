@@ -2,9 +2,13 @@ import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:ceg4912_project/Support/queries.dart';
+
 import 'package:ceg4912_project/customer_payment.dart';
 import 'package:ceg4912_project/customer_receipt_history_page.dart';
 import 'package:ceg4912_project/customer_scanned_receipt_page.dart';
+
+import 'package:ceg4912_project/customer_receipt_history.dart';
+
 import 'package:ceg4912_project/item_page.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Support/utility.dart';
@@ -94,13 +98,22 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   }
 
 
+
   Future<void> loadScanReceiptPage() async {
     //loads scanning page
     String result = await FlutterBarcodeScanner.scanBarcode(
         '#ff6666', 'Cancel', true, ScanMode.QR);
     print("label data: " + result);
 
+
     //extracts the receipt Id from the JSON result
+
+    // Exit out of here if the user cancelled. The return is -1 in this case.
+    if (result == "-1") {
+      return;
+    }
+
+
     Map extractID = jsonDecode(result);
     print(extractID["receiptId"]);
     receiptId = int.parse(extractID["receiptId"]);
@@ -115,8 +128,10 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     }
     catch (e) {
       print("PAYMENT FAILED ==> makePayment() threw Exception");
+
     }
   }
+
 
   void loadCustomerAccountPage() {}
 
@@ -141,6 +156,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   }
 
 
+
   showAlertDialog(BuildContext context) async {
     MySqlConnection connection = await Queries.getConnection();
     // set up the button
@@ -157,6 +173,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
       child: const Text("Cancel"),
       onPressed: () {
         Navigator.of(context).pop(context);
+
       },
     );
 
@@ -242,6 +259,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
               children: [
                 Container(
                   margin: const EdgeInsets.all(8),
+
                   width: MediaQuery
                       .of(context)
                       .size
@@ -250,6 +268,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                       .of(context)
                       .size
                       .height / 4.5,
+
                   color: Utility.getBackGroundColor(),
                   child: TextButton(
                     onPressed: loadScanReceiptPage,
