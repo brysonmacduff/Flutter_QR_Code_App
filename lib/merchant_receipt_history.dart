@@ -56,6 +56,8 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
 
   // generates widgets for all of the current merchant's business receipt
   void _getReceipts() async {
+    if (customerIds.isEmpty) return;
+
     int mId = Session.getSessionUser().getId();
     // hardcoded cid for now
 
