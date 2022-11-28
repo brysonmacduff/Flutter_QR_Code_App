@@ -1,3 +1,4 @@
+import 'package:ceg4912_project/Models/ReceiptSystemModel.dart';
 import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/merchant_receipt_qr_page.dart';
@@ -11,6 +12,7 @@ import 'package:ceg4912_project/Models/receipt.dart';
 import 'dart:convert';
 
 import 'package:mysql1/mysql1.dart';
+import 'package:provider/provider.dart';
 
 class MerchantReceiptPage extends StatefulWidget {
   const MerchantReceiptPage({Key? key}) : super(key: key);
@@ -171,7 +173,13 @@ class _MerchantReceiptPageState extends State<MerchantReceiptPage> {
           context, "Connection Error", "Please check your network connection.");
       return;
     }
-
+    //Inserting onto blockchain section
+    //Initializing smartcontract
+    var listModel = Provider.of<ReceiptSystemModel>(context, listen: false);
+    await listModel.init();
+    //Inserting data
+    listModel.insertReceipt(receipt.getId(), receipt.getDateTime().toString(),
+        receipt.getCost(), receipt.getMerchantId(), 0);
     // this is the JSON data that will appear in the QR code receipt that is presented to the customer
     String qrData = "{\"receiptId\":\"" + receiptId.toString() + "\"}";
 

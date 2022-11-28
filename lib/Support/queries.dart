@@ -41,6 +41,26 @@ class Queries {
     }
   }
 
+  static getReceiptbyReceiptId(MySqlConnection conn, int receiptId) async {
+    String query = "select * from receipt where rId = '$receiptId'";
+    try {
+      var results = await conn.query(query);
+      var iterator = results.iterator;
+      while (iterator.moveNext()) {
+        var result = iterator.current;
+        return [
+          result["rId"],
+          result["rDateTime"],
+          result["rCost"],
+          result["mId"],
+          result["cId"]
+        ];
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
   static getReceiptAmount(MySqlConnection conn, int receiptId) async {
     String query = "select * from receipt where rId='$receiptId'";
     try {

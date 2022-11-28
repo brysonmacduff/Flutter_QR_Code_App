@@ -37,14 +37,16 @@ class ReceiptSystemModel extends ChangeNotifier {
 
   ReceiptSystemModel() {
     init();
+    print("working");
   }
 
   Future<void> init() async {
     _web3client = Web3Client(_rpcUrl, Client(), socketConnector: () {
       return IOWebSocketChannel.connect(_wsUrl).cast<String>();
     });
-
     await getAbi();
+    await getCredentials();
+    await getDeployedContract();
   }
 
   Future<void> getAbi() async {
@@ -54,13 +56,11 @@ class ReceiptSystemModel extends ChangeNotifier {
     _abiCode = jsonEncode(jsonAbi["abi"]);
     _contractAddress =
         EthereumAddress.fromHex("0x4c9224B0Bb5feAB053E93699bd09a804f77DEd20");
-    await getCredentials();
   }
 
   Future<void> getCredentials() async {
     _credentials = await EthPrivateKey.fromHex(_privatekey);
     _ownAddress = await _credentials.extractAddress();
-    await getDeployedContract();
   }
 
   Future<void> getDeployedContract() async {
@@ -94,6 +94,7 @@ class ReceiptSystemModel extends ChangeNotifier {
 
   void insertReceipt(
       int Rid, String DateTime, double cost, int Mid, int Cid) async {
+    init();
     isLoading = true;
     notifyListeners();
     int nCost = (cost * 100).toInt();
