@@ -15,6 +15,9 @@ import 'package:ceg4912_project/Models/user.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+
+import 'Models/ReceiptSystemModel.dart';
 
 class CustomerHomePage extends StatefulWidget {
   const CustomerHomePage({Key? key}) : super(key: key);
@@ -98,7 +101,23 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
       } catch (e) {
         print("############################## EXCEPTION : Scan failed");
       }
-
+      /*
+      try {
+        MySqlConnection connection = await Queries.getConnection();
+        bool success = false;
+        var results =
+            await Queries.getReceiptbyReceiptId(connection, receiptId);
+        success = true;
+        print("###################### RECEIPT FETCH SUCCESS? $success");
+        var listModel = Provider.of<ReceiptSystemModel>(context, listen: false);
+        await listModel.init();
+        //Inserting data
+        listModel.insertReceipt(
+            results[0], results[1], results[2], results[3], userId);
+      } catch (e) {
+        print("###################### RECEIPT FETCH FAILED");
+      }
+      */
     } catch (e, s) {
       print('exception:$e$s');
     }
