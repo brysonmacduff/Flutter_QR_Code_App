@@ -101,6 +101,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
       } catch (e) {
         print("############################## EXCEPTION : Scan failed");
       }
+      /*
       try {
         MySqlConnection connection = await Queries.getConnection();
         bool success = false;
@@ -116,6 +117,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
       } catch (e) {
         print("###################### RECEIPT FETCH FAILED");
       }
+      */
     } catch (e, s) {
       print('exception:$e$s');
     }
