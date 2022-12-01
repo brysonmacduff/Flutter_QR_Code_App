@@ -2,6 +2,7 @@ import 'package:ceg4912_project/Models/receipt.dart';
 import 'package:ceg4912_project/Support/session.dart';
 import 'package:ceg4912_project/Support/queries.dart';
 import 'package:ceg4912_project/Support/utility.dart';
+import 'package:ceg4912_project/customer_scanned_receipt_page.dart';
 import 'package:ceg4912_project/merchant_filter.dart';
 import 'package:ceg4912_project/merchant_home.dart';
 import 'package:ceg4912_project/receipt_item_list_page.dart';
@@ -30,7 +31,7 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
   //Stores all customers
   List<int> customerIds = <int>[];
   //List of items on expanded widget
-  List<Item> widgetItems = <Item>[];
+  List<ReceiptItem> widgetItems = <ReceiptItem>[];
 
   // the color of event messages that are displayed to the user
   Color eventMessageColor = Colors.white;
@@ -73,8 +74,6 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
       //Get list of receipt ids for current id
 
       var receiptItemIds = await Queries.getReceiptItemIds(conn, receiptId);
-      print("ReceiptItemIDs");
-      print(receiptItemIds);
       if (receiptItemIds == null) {
         setState(() {
           eventMessage = "Receipt Retrieval Failed: Receipt has no receipt items.";
@@ -94,8 +93,6 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
       //Go through receipt items, per receipt, create each item, save in list
       for(int receiptItemId in receipt_master){
          var item = await Queries.getItemByReceiptId(conn, receiptItemId);
-         print("legit item:");
-         print(item);
 
          if (item == null) {
            setState(() {
@@ -156,8 +153,7 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
     widgetItems.clear();
     List<ReceiptItem> rItems = receipts[rid].getReceiptItems();
     for (ReceiptItem rItem in rItems) {
-      Item item = rItem.getItem();
-      widgetItems.add(item);
+      widgetItems.add(rItem);
     }
   }
 
@@ -211,10 +207,10 @@ class _ReceiptHistoryState extends State<MerchantReceiptHistoryPage> {
                   ),
                 ),
                 IconButton(
-                  onPressed: () => {_getReceiptItems(i), Navigator.push(
+                  onPressed: () => {Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (_) => ReceiptItemListPage(items: widgetItems)
+                          builder: (_) => CustomerScannedReceiptPage(receiptID: receipts[i].getId())
                       )
                   )},
                   icon: const Icon(
